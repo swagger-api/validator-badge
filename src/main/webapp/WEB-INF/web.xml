@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
+    xmlns:j2ee = "http://java.sun.com/xml/ns/j2ee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee  http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+
+  <servlet> 
+    <servlet-name>static</servlet-name> 
+    <servlet-class>org.eclipse.jetty.servlet.DefaultServlet</servlet-class> 
+  </servlet> 
+
+  <servlet-mapping> 
+    <servlet-name>static</servlet-name> 
+    <url-pattern>*.png</url-pattern>
+    <url-pattern>*.html</url-pattern>
+  </servlet-mapping> 
+
+  <!-- badge -->
+  <servlet>
+    <servlet-name>BadgeServlet</servlet-name>
+    <servlet-class>com.wordnik.swagger.BadgeServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>BadgeServlet</servlet-name>
+    <url-pattern>/</url-pattern>
+  </servlet-mapping>
+</web-app>
