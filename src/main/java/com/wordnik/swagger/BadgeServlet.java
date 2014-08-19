@@ -26,7 +26,6 @@ public class BadgeServlet extends HttpServlet {
       }
       else {
         String inputDoc = getUrlContents(url);
-        // System.out.println(inputDoc);
         String schemaText = getUrlContents(SCHEMA_FILE);
         JsonNode schemaObject = MAPPER.readTree(schemaText);
         JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
