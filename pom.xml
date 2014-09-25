@@ -70,6 +70,11 @@
   </build>
   <dependencies>
     <dependency>
+      <groupId>com.wordnik</groupId>
+      <artifactId>swagger-jaxrs</artifactId>
+      <version>${swagger-core-version}</version>
+    </dependency>
+    <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
       <version>${servlet-api-version}</version>
@@ -79,10 +84,48 @@
       <artifactId>json-schema-validator</artifactId>
       <version>${json-schema-validator-version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-core</artifactId>
+      <version>${jersey-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-json</artifactId>
+      <version>${jersey-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.sun.jersey</groupId>
+      <artifactId>jersey-servlet</artifactId>
+      <version>${jersey-version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>15.0</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>${commons-io-version}</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
   <properties>
+    <jersey-version>1.13</jersey-version>
+    <commons-io-version>2.3</commons-io-version>
+    <swagger-core-version>1.5.0-SNAPSHOT</swagger-core-version>
     <servlet-api-version>2.5</servlet-api-version>
     <jetty-version>8.1.11.v20130520</jetty-version>
     <json-schema-validator-version>2.2.5</json-schema-validator-version>
   </properties>
+  <repositories>
+    <repository>
+      <id>sonatype-snapshots</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <snapshots>
+        <enabled>true</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
 </project>
