@@ -14,4 +14,6 @@ For example, using [https://raw.githubusercontent.com/reverb/swagger-spec/master
 
 ![](http://online.swagger.io/validator?url=https://raw.githubusercontent.com/reverb/swagger-spec/master/examples/v2.0/json/petstore-expanded.json)
 
+If your specification fails to validate for some reason, or if there is an error, you can get more information on why by visiting ```http://online.swagger.io/validator/debug?url={YOUR_URL}```.
+
 Since the validator uses a browserless back-end to fetch the contents and schema, it's not subject to the terrible world of CORS.
