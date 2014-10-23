@@ -23,7 +23,7 @@ import javax.servlet.http.*;
 
 public class ValidatorService {
   static String SCHEMA_FILE = "schema.json";
-  static String SCHEMA_URL = "https://raw.githubusercontent.com/reverb/swagger-spec/master/schemas/v2.0/schema.json";
+  static String SCHEMA_URL = "http://swagger.io/v2/schema.json";
   static ObjectMapper MAPPER = new ObjectMapper();
 
   public void validateByUrl(HttpServletRequest request, HttpServletResponse response, String url) {
