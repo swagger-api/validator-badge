@@ -12,7 +12,7 @@ import javax.servlet.http.*;
 
 import java.util.*;
 
-@Path("/validator")
+@Path("/")
 @Api(value = "/validator", description = "Validator for Swagger Specs")
 public class ValidatorResource {
   ValidatorService service = new ValidatorService();
@@ -47,7 +47,7 @@ public class ValidatorResource {
     @Context HttpServletResponse response,
     @ApiParam(value = "url of spec to validate" ) @QueryParam("url")String url) throws WebApplicationException {
     try {
-      return Response.ok().entity(service.debugByUrl(url)).build();
+      return Response.ok().entity(service.debugByUrl(request, response, url)).build();
     }
     catch (Exception e) {
       return Response.status(500).build();
@@ -66,7 +66,7 @@ public class ValidatorResource {
     @Context HttpServletResponse response,
     @ApiParam(value = "spec contents" )String spec) throws WebApplicationException {
     try {
-      return Response.ok().entity(service.debugByContent(spec)).build();
+      return Response.ok().entity(service.debugByContent(request, response, spec)).build();
     }
     catch (Exception e) {
       return Response.status(500).build();

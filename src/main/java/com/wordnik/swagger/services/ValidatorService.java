@@ -14,6 +14,9 @@ import com.github.fge.jsonschema.main.*;
 import com.github.fge.jsonschema.core.report.*;
 import com.github.fge.jackson.JsonLoader;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.*;
 import java.io.*;
 import java.util.*;
@@ -25,21 +28,32 @@ public class ValidatorService {
   static String SCHEMA_FILE = "schema.json";
   static String SCHEMA_URL = "http://swagger.io/v2/schema.json";
   static ObjectMapper MAPPER = new ObjectMapper();
+  Logger LOGGER = LoggerFactory.getLogger(ValidatorService.class);
+  private JsonSchema schema;
 
   public void validateByUrl(HttpServletRequest request, HttpServletResponse response, String url) {
+    System.out.println("validationUrl: " + url + ", forClient: " + getRemoteAddr(request) + ", method: get");
     if(url == null) {
       fail(response);
     }
     else {
       try {
         String inputDoc = getUrlContents(url);
-        String schemaText = getSchema();
-        JsonNode schemaObject = MAPPER.readTree(schemaText);
-        JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
-        JsonSchema schema = factory.getJsonSchema(schemaObject);
+
+        if (schema == null) {
+          String schemaText = getSchema();
+          JsonNode schemaObject = MAPPER.readTree(schemaText);
+          JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
+          schema = factory.getJsonSchema(schemaObject);
+        }
         ProcessingReport report = schema.validate(JsonLoader.fromString(inputDoc));
-        if(report.isSuccess())
+        if(report.isSuccess()) {
+          Swagger swagger = Json.mapper().readValue(inputDoc, Swagger.class);
+          if(swagger != null) {
+            System.out.println("swaggerHost: " + swagger.getHost() + ", forClient: " + getRemoteAddr(request));
+          }
           success(response);
+        }
         else
           fail(response);
       }
@@ -49,12 +63,9 @@ public class ValidatorService {
     }
   }
 
-  public List<SchemaValidationError> debugByUrl(String url) throws Exception {
-    String inputDoc = getUrlContents(url);
-    return debugByContent(inputDoc);
-  }
-
-  public List<SchemaValidationError> debugByContent(String content) throws Exception {
+  public List<SchemaValidationError> debugByUrl(HttpServletRequest request, HttpServletResponse response, String url) throws Exception {
+    System.out.println("validationUrl: " + url + ", forClient: " + getRemoteAddr(request) + ", method: get, debug: true");
+    String content = getUrlContents(url);
     String schemaText = getSchema();
     JsonNode schemaObject = MAPPER.readTree(schemaText);
     JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
@@ -62,6 +73,39 @@ public class ValidatorService {
     ProcessingReport report = schema.validate(JsonLoader.fromString(content));
     ListProcessingReport lp = new ListProcessingReport();
     lp.mergeWith(report);
+
+    if(report.isSuccess()) {
+      Swagger swagger = Json.mapper().readValue(content, Swagger.class);
+      if(swagger != null) {
+        System.out.println("swaggerHost: " + swagger.getHost() + ", forClient: " + getRemoteAddr(request));
+      }
+    }
+
+    List<SchemaValidationError> output = new ArrayList<SchemaValidationError>();
+    java.util.Iterator<ProcessingMessage> it = lp.iterator();
+    while(it.hasNext()) {
+      ProcessingMessage pm = it.next();
+      output.add(new SchemaValidationError(pm.asJson()));
+    }
+    return output;
+  }
+
+  public List<SchemaValidationError> debugByContent(HttpServletRequest request, HttpServletResponse response, String content) throws Exception {
+    System.out.println("validationUrl: n/a, forClient: " + getRemoteAddr(request) + ", method: post, debug: true");
+    String schemaText = getSchema();
+    JsonNode schemaObject = MAPPER.readTree(schemaText);
+    JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
+    JsonSchema schema = factory.getJsonSchema(schemaObject);
+    ProcessingReport report = schema.validate(JsonLoader.fromString(content));
+    ListProcessingReport lp = new ListProcessingReport();
+    lp.mergeWith(report);
+
+    if(report.isSuccess()) {
+      Swagger swagger = Json.mapper().readValue(content, Swagger.class);
+      if(swagger != null) {
+        System.out.println("swaggerHost: " + swagger.getHost() + ", forClient: " + getRemoteAddr(request));
+      }
+    }
 
     List<SchemaValidationError> output = new ArrayList<SchemaValidationError>();
     java.util.Iterator<ProcessingMessage> it = lp.iterator();
@@ -140,5 +184,14 @@ public class ValidatorService {
       contents.append(inputLine);
     in.close();
     return contents.toString();
+  }
+
+  protected String getRemoteAddr(HttpServletRequest request) {
+    String ipAddress = request.getHeader("X-FORWARDED-FOR");  
+    if (ipAddress == null) {  
+      ipAddress = request.getRemoteAddr();
+    }
+
+    return ipAddress;
   }
 }
