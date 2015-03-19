@@ -50,6 +50,7 @@ public class ValidatorResource {
       return Response.ok().entity(service.debugByUrl(request, response, url)).build();
     }
     catch (Exception e) {
+      e.printStackTrace();
       return Response.status(500).build();
     }
   }

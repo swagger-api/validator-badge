@@ -21,10 +21,51 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 
+import java.security.*;
+import java.security.cert.X509Certificate;
+import javax.net.ssl.*;
 import javax.servlet.*;
 import javax.servlet.http.*;
 
 public class ValidatorService {
+  static {
+    disableSslVerification();
+  }
+
+  private static void disableSslVerification() {
+    try {
+      // Create a trust manager that does not validate certificate chains
+      TrustManager[] trustAllCerts = new TrustManager[] {
+        new X509TrustManager() {
+          public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+            return null;
+          }
+          public void checkClientTrusted(X509Certificate[] certs, String authType) { }
+          public void checkServerTrusted(X509Certificate[] certs, String authType) { }
+        }
+      };
+
+      // Install the all-trusting trust manager
+      SSLContext sc = SSLContext.getInstance("SSL");
+      sc.init(null, trustAllCerts, new java.security.SecureRandom());
+      HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
+
+      // Create all-trusting host name verifier
+      HostnameVerifier allHostsValid = new HostnameVerifier() {
+          public boolean verify(String hostname, SSLSession session) {
+              return true;
+          }
+      };
+
+      // Install the all-trusting host verifier
+      HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
+    } catch (NoSuchAlgorithmException e) {
+      e.printStackTrace();
+    } catch (KeyManagementException e) {
+      e.printStackTrace();
+    }
+  }
+
   static String SCHEMA_FILE = "schema.json";
   static String SCHEMA_URL = "http://swagger.io/v2/schema.json";
   static ObjectMapper MAPPER = new ObjectMapper();
@@ -58,6 +99,7 @@ public class ValidatorService {
           fail(response);
       }
       catch (Exception e) {
+        e.printStackTrace();
         error(response);
       }
     }
@@ -174,6 +216,7 @@ public class ValidatorService {
   }
 
   private String getUrlContents(String urlString) throws Exception {
+    System.setProperty ("jsse.enableSNIExtension", "false");
     URL url = new URL(urlString);
     BufferedReader in = new BufferedReader(
       new InputStreamReader(url.openStream()));
