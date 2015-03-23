@@ -67,11 +67,9 @@ public class ValidatorService {
     lp.mergeWith(report);
 
     List<SchemaValidationError> output = new ArrayList<SchemaValidationError>();
-    java.util.Iterator<ProcessingMessage> it = lp.iterator();
-    while(it.hasNext()) {
-      ProcessingMessage pm = it.next();
-      output.add(new SchemaValidationError(pm.asJson()));
-    }
+      for (ProcessingMessage pm : lp) {
+          output.add(new SchemaValidationError(pm.asJson()));
+      }
     return output;
   }
 
