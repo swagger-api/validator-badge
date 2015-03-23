@@ -1,27 +1,26 @@
 package com.wordnik.swagger.services;
 
-import com.wordnik.swagger.util.Json;
-
-import com.wordnik.swagger.models.*;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.apache.commons.io.IOUtils;
-
-import com.github.fge.jsonschema.core.exceptions.ProcessingException;
-import com.github.fge.jsonschema.main.*;
-import com.github.fge.jsonschema.core.report.*;
 import com.github.fge.jackson.JsonLoader;
+import com.github.fge.jsonschema.core.report.ListProcessingReport;
+import com.github.fge.jsonschema.core.report.ProcessingMessage;
+import com.github.fge.jsonschema.core.report.ProcessingReport;
+import com.github.fge.jsonschema.main.JsonSchema;
+import com.github.fge.jsonschema.main.JsonSchemaFactory;
+import com.wordnik.swagger.models.SchemaValidationError;
+import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
-import org.apache.log4j.Logger.*;
 
-import java.net.*;
-import java.io.*;
-import java.util.*;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ValidatorService {
   static String SCHEMA_FILE = "schema.json";
