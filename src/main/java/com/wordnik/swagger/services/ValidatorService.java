@@ -13,6 +13,8 @@ import com.github.fge.jsonschema.core.exceptions.ProcessingException;
 import com.github.fge.jsonschema.main.*;
 import com.github.fge.jsonschema.core.report.*;
 import com.github.fge.jackson.JsonLoader;
+import org.apache.log4j.Logger;
+import org.apache.log4j.Logger.*;
 
 import java.net.*;
 import java.io.*;
@@ -25,6 +27,7 @@ public class ValidatorService {
   static String SCHEMA_FILE = "schema.json";
   static String SCHEMA_URL = "http://swagger.io/v2/schema.json";
   static ObjectMapper MAPPER = new ObjectMapper();
+  private static final Logger log = Logger.getLogger(ValidatorService.class);
 
   public void validateByUrl(HttpServletRequest request, HttpServletResponse response, String url) {
     if(url == null) {
@@ -81,7 +84,7 @@ public class ValidatorService {
       }
     }
     catch(IOException e) {
-      e.printStackTrace();
+        log.error(e.getMessage());
     }
   }
 
@@ -94,7 +97,7 @@ public class ValidatorService {
       }
     }
     catch(IOException e) {
-      e.printStackTrace();
+        log.error(e.getMessage());
     }
   }
 
@@ -107,7 +110,7 @@ public class ValidatorService {
       }
     }
     catch(IOException e) {
-      e.printStackTrace();
+        log.error(e.getMessage());
     }
   }
 
