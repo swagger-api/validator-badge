@@ -23,9 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ValidatorService {
-    static String SCHEMA_FILE = "schema.json";
-    static String SCHEMA_URL = "http://swagger.io/v2/schema.json";
-    static ObjectMapper MAPPER = new ObjectMapper();
+    private static final String SCHEMA_FILE = "schema.json";
+    private static final String SCHEMA_URL = "http://swagger.io/v2/schema.json";
+    private static ObjectMapper MAPPER = new ObjectMapper();
     private static final Logger log = Logger.getLogger(ValidatorService.class);
 
     public void validateByUrl(HttpServletRequest request, HttpServletResponse response, String url) {
