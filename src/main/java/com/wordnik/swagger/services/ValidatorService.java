@@ -28,6 +28,9 @@ import javax.servlet.*;
 import javax.servlet.http.*;
 
 public class ValidatorService {
+  static long LAST_FETCH = 0;
+  static String CACHED_SCHEMA = null;
+
   static {
     disableSslVerification();
   }
@@ -198,8 +201,13 @@ public class ValidatorService {
   }
 
   private String getSchema() throws Exception {
+    if(CACHED_SCHEMA != null && (System.currentTimeMillis() - LAST_FETCH) < 600000) {
+      return CACHED_SCHEMA;
+    }
     try{
-      return getUrlContents(SCHEMA_URL);
+      LAST_FETCH = System.currentTimeMillis();
+      CACHED_SCHEMA = getUrlContents(SCHEMA_URL);
+      return CACHED_SCHEMA;
     }
     catch (Exception e) {
       InputStream is = this.getClass().getClassLoader().getResourceAsStream(SCHEMA_FILE);
@@ -211,7 +219,9 @@ public class ValidatorService {
       while ((inputLine = in.readLine()) != null)
         contents.append(inputLine);
       in.close();
-      return contents.toString();
+      LAST_FETCH = System.currentTimeMillis();
+      CACHED_SCHEMA = contents.toString();
+      return CACHED_SCHEMA;
     }
   }
 
