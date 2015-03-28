@@ -23,14 +23,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ValidatorService {
-    static String SCHEMA_FILE = "schema.json";
-    static String SCHEMA_URL = "http://swagger.io/v2/schema.json";
-    static ObjectMapper MAPPER = new ObjectMapper();
+    private static final String SCHEMA_FILE = "schema.json";
+    private static final String SCHEMA_URL = "http://swagger.io/v2/schema.json";
+    private static ObjectMapper MAPPER = new ObjectMapper();
     private static final Logger log = Logger.getLogger(ValidatorService.class);
 
     public void validateByUrl(HttpServletRequest request, HttpServletResponse response, String url) {
         if (url == null) {
-            fail(response);
+            onFailure(response);
         } else {
             try {
                 String inputDoc = getUrlContents(url);
@@ -40,11 +40,11 @@ public class ValidatorService {
                 JsonSchema schema = factory.getJsonSchema(schemaObject);
                 ProcessingReport report = schema.validate(JsonLoader.fromString(inputDoc));
                 if (report.isSuccess())
-                    success(response);
+                    onSuccess(response);
                 else
-                    fail(response);
+                    onFailure(response);
             } catch (Exception e) {
-                error(response);
+                onError(response);
             }
         }
     }
@@ -70,7 +70,7 @@ public class ValidatorService {
         return output;
     }
 
-    private void success(HttpServletResponse response) {
+    private void onSuccess(HttpServletResponse response) {
         try {
             String name = "valid.png";
             InputStream is = this.getClass().getClassLoader().getResourceAsStream(name);
@@ -82,7 +82,7 @@ public class ValidatorService {
         }
     }
 
-    private void error(HttpServletResponse response) {
+    private void onError(HttpServletResponse response) {
         try {
             String name = "error.png";
             InputStream is = this.getClass().getClassLoader().getResourceAsStream(name);
@@ -94,7 +94,7 @@ public class ValidatorService {
         }
     }
 
-    private void fail(HttpServletResponse response) {
+    private void onFailure(HttpServletResponse response) {
         try {
             String name = "invalid.png";
             InputStream is = this.getClass().getClassLoader().getResourceAsStream(name);
