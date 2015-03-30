@@ -22,12 +22,22 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Validator service class which is used to validate the swagger
+ */
 public class ValidatorService {
     private static final String SCHEMA_FILE = "schema.json";
     private static final String SCHEMA_URL = "http://swagger.io/v2/schema.json";
     private static ObjectMapper MAPPER = new ObjectMapper();
     private static final Logger log = Logger.getLogger(ValidatorService.class);
 
+    /**
+     * This method validates the swagger
+     *
+     * @param request  http Request
+     * @param response http response
+     * @param url      url of the swagger to be validated
+     */
     public void validateByUrl(HttpServletRequest request, HttpServletResponse response, String url) {
         if (url == null) {
             onFailure(response);
@@ -49,11 +59,25 @@ public class ValidatorService {
         }
     }
 
+    /**
+     * This method used to debug by URL
+     *
+     * @param url url of the swagger to be debug
+     * @return validity of the swagger
+     * @throws Exception
+     */
     public List<SchemaValidationError> debugByUrl(String url) throws Exception {
         String inputDoc = getUrlContents(url);
         return debugByContent(inputDoc);
     }
 
+    /**
+     * This method used to debug by content
+     *
+     * @param content swagger content
+     * @return validity of the swagger
+     * @throws Exception
+     */
     public List<SchemaValidationError> debugByContent(String content) throws Exception {
         String schemaText = getSchema();
         JsonNode schemaObject = MAPPER.readTree(schemaText);
@@ -70,6 +94,11 @@ public class ValidatorService {
         return output;
     }
 
+    /**
+     * This method displays valid png
+     *
+     * @param response HttpResponse
+     */
     private void onSuccess(HttpServletResponse response) {
         try {
             String name = "valid.png";
@@ -82,6 +111,11 @@ public class ValidatorService {
         }
     }
 
+    /**
+     * This method displays error png
+     *
+     * @param response HttpResponse
+     */
     private void onError(HttpServletResponse response) {
         try {
             String name = "error.png";
@@ -94,6 +128,11 @@ public class ValidatorService {
         }
     }
 
+    /**
+     * This method displays invalid png
+     *
+     * @param response HttpResponse
+     */
     private void onFailure(HttpServletResponse response) {
         try {
             String name = "invalid.png";
@@ -106,6 +145,12 @@ public class ValidatorService {
         }
     }
 
+    /**
+     * This method used to get the schema
+     *
+     * @return schema
+     * @throws Exception
+     */
     private String getSchema() throws Exception {
         try {
             return getUrlContents(SCHEMA_URL);
@@ -123,6 +168,12 @@ public class ValidatorService {
         }
     }
 
+    /**
+     * This method used to get URL contents
+     * @param urlString url
+     * @return url content
+     * @throws Exception
+     */
     private String getUrlContents(String urlString) throws Exception {
         URL url = new URL(urlString);
         BufferedReader in = new BufferedReader(
