@@ -1,7 +1,6 @@
 package com.wordnik.swagger.models;
 
 import com.fasterxml.jackson.databind.*;
-import com.fasterxml.jackson.databind.deser.*; 
 import com.fasterxml.jackson.databind.node.*;
 
 import java.util.*;
@@ -17,41 +16,41 @@ public class SchemaValidationError {
   public SchemaValidationError(JsonNode node) {
     JsonNode prop = node.get("level");
     if(prop != null)
-      level = (String) ((TextNode) prop).asText();
+      level = prop.asText();
 
     prop = node.get("domain");
     if(prop != null)
-      domain = (String) ((TextNode) prop).asText();
+      domain = prop.asText();
 
     prop = node.get("keyword");
     if(prop != null)
-      keyword = (String) ((TextNode) prop).asText();
+      keyword = prop.asText();
 
     prop = node.get("message");
     if(prop != null)
-      message = (String) ((TextNode) prop).asText();
+      message = prop.asText();
 
     prop = node.get("schema");
     if(prop != null) {
       schema = new Schema();
-      JsonNode s = (JsonNode) prop;
+      JsonNode s = prop;
       prop = s.get("loadingURI");
       if(prop != null)
-        schema.setLoadingURI((String) ((TextNode) prop).asText());
+        schema.setLoadingURI(prop.asText());
       prop = s.get("pointer");
       if(prop != null)
-        schema.setPointer((String) ((TextNode) prop).asText());
+        schema.setPointer(prop.asText());
     }
 
     prop = node.get("instance");
     if(prop != null) {
       instance = new Instance();
-      JsonNode s = (JsonNode) prop;
+      JsonNode s = prop;
       prop = s.get("pointer");
       if(prop != null)
-        instance.setPointer((String) ((TextNode) prop).asText());
+        instance.setPointer(prop.asText());
     }
-    
+
     prop = node.get("required");
     if(prop != null) {
       ArrayNode an = (ArrayNode) prop;
