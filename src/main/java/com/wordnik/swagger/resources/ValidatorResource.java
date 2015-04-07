@@ -4,13 +4,11 @@ import com.wordnik.swagger.services.*;
 import com.wordnik.swagger.annotations.*;
 import com.wordnik.swagger.models.SchemaValidationError;
 
-import com.github.fge.jsonschema.core.report.ProcessingReport;
 
 import javax.ws.rs.core.*;
 import javax.ws.rs.*;
 import javax.servlet.http.*;
 
-import java.util.*;
 
 @Path("/")
 @Api(value = "/validator", description = "Validator for Swagger Specs")
@@ -51,11 +49,6 @@ public class ValidatorResource {
             return Response.status(500).build();
         }
     }
-    catch (Exception e) {
-      e.printStackTrace();
-      return Response.status(500).build();
-    }
-  }
 
     @POST
     @Path("/debug")
