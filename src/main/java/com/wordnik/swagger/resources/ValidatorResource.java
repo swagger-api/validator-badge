@@ -51,6 +51,11 @@ public class ValidatorResource {
             return Response.status(500).build();
         }
     }
+    catch (Exception e) {
+      e.printStackTrace();
+      return Response.status(500).build();
+    }
+  }
 
     @POST
     @Path("/debug")
