@@ -102,7 +102,7 @@ public class ValidatorService {
           fail(response);
       }
       catch (Exception e) {
-        e.printStackTrace();
+        System.out.println(e.getMessage());
         error(response);
       }
     }
@@ -227,15 +227,22 @@ public class ValidatorService {
 
   private String getUrlContents(String urlString) throws Exception {
     System.setProperty ("jsse.enableSNIExtension", "false");
-    URL url = new URL(urlString);
-    BufferedReader in = new BufferedReader(
-      new InputStreamReader(url.openStream()));
 
-    String inputLine;
+    URL url = new URL(urlString);
+
+    URLConnection urlc = url.openConnection();
+    urlc.setRequestProperty("Accept", "application/json, */*");
+    urlc.connect();
+
     StringBuilder contents = new StringBuilder();
-    while ((inputLine = in.readLine()) != null)
-      contents.append(inputLine);
+    InputStream in = urlc.getInputStream();
+    for(int i = 0;i!= -1;i= in.read()){
+      char c = (char)i;
+      if(!Character.isISOControl(c))
+        contents.append((char)i);
+    }
     in.close();
+
     return contents.toString();
   }
 
