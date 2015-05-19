@@ -91,12 +91,21 @@ public class ValidatorService {
           JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
           schema = factory.getJsonSchema(schemaObject);
         }
-        ProcessingReport report = schema.validate(readNode(inputDoc));
+
+        JsonNode spec = readNode(inputDoc);
+        String version = getVersion(spec);
+        if(version != null && version.startsWith("\"1.")) {
+          upgrade(response);
+          return;
+        }
+
+        ProcessingReport report = schema.validate(spec);
         if(report.isSuccess()) {
           Swagger swagger = readSwagger(inputDoc);
           if(swagger != null) {
+            success(response);
           }
-          success(response);
+          else fail(response);
         }
         else {
           fail(response);
@@ -108,9 +117,35 @@ public class ValidatorService {
     }
   }
 
+  private String getVersion(JsonNode node) {
+    JsonNode version = node.get("swagger");
+    if(version != null) {
+      return version.toString();
+    }
+    version = node.get("swaggerVersion");
+    if(version != null) {
+      return version.toString();
+    }
+    return null;
+  }
+
   public List<SchemaValidationError> debugByUrl(HttpServletRequest request, HttpServletResponse response, String url) throws Exception {
     String content = getUrlContents(url);
     JsonNode schemaObject = JsonMapper.readTree(getSchema());
+
+    List<SchemaValidationError> output = new ArrayList<SchemaValidationError>();
+
+    JsonNode spec = readNode(content);
+    String version = getVersion(spec);
+
+    if(version != null && version.startsWith("\"1.")) {
+      ProcessingMessage pm = new ProcessingMessage();
+      pm.setLogLevel(LogLevel.ERROR);
+      pm.setMessage("Deprecated Swagger version.  Please visit http://swagger.io for information on upgrading to Swagger 2.0");
+      output.add(new SchemaValidationError(pm.asJson()));
+      return output;
+    }
+
     JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
     JsonSchema schema = factory.getJsonSchema(schemaObject);
     ProcessingReport report = schema.validate(readNode(content));
@@ -119,11 +154,8 @@ public class ValidatorService {
 
     if(report.isSuccess()) {
       Swagger swagger = readSwagger(content);
-      if(swagger != null) {
-      }
     }
 
-    List<SchemaValidationError> output = new ArrayList<SchemaValidationError>();
     java.util.Iterator<ProcessingMessage> it = lp.iterator();
     while(it.hasNext()) {
       ProcessingMessage pm = it.next();
@@ -184,6 +216,19 @@ public class ValidatorService {
   private void fail(HttpServletResponse response) {
     try {
       String name = "invalid.png";
+      InputStream is = this.getClass().getClassLoader().getResourceAsStream(name);
+      if(is != null) {
+        IOUtils.copy(is, response.getOutputStream());
+      }
+    }
+    catch(IOException e) {
+      e.printStackTrace();
+    }
+  }
+
+  private void upgrade(HttpServletResponse response) {
+    try {
+      String name = "upgrade.png";
       InputStream is = this.getClass().getClassLoader().getResourceAsStream(name);
       if(is != null) {
         IOUtils.copy(is, response.getOutputStream());
