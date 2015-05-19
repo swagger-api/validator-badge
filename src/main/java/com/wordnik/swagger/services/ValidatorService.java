@@ -130,10 +130,22 @@ public class ValidatorService {
   }
 
   public List<SchemaValidationError> debugByUrl(HttpServletRequest request, HttpServletResponse response, String url) throws Exception {
-    String content = getUrlContents(url);
-    JsonNode schemaObject = JsonMapper.readTree(getSchema());
-
     List<SchemaValidationError> output = new ArrayList<SchemaValidationError>();
+
+    String content;
+
+    try{
+      content = getUrlContents(url);
+    }
+    catch (IOException e) {
+      ProcessingMessage pm = new ProcessingMessage();
+      pm.setLogLevel(LogLevel.ERROR);
+      pm.setMessage("Can't read from file " + url);
+      output.add(new SchemaValidationError(pm.asJson()));
+      return output;
+    }
+
+    JsonNode schemaObject = JsonMapper.readTree(getSchema());
 
     JsonNode spec = readNode(content);
     String version = getVersion(spec);
@@ -264,7 +276,7 @@ public class ValidatorService {
     }
   }
 
-  private String getUrlContents(String urlString) throws Exception {
+  private String getUrlContents(String urlString) throws IOException {
     System.setProperty ("jsse.enableSNIExtension", "false");
 
     URL url = new URL(urlString);
