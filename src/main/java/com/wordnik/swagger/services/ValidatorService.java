@@ -165,7 +165,16 @@ public class ValidatorService {
     lp.mergeWith(report);
 
     if(report.isSuccess()) {
-      Swagger swagger = readSwagger(content);
+      try{
+        readSwagger(content);
+      }
+      catch (IllegalArgumentException e) {
+        ProcessingMessage pm = new ProcessingMessage();
+        pm.setLogLevel(LogLevel.ERROR);
+        pm.setMessage("unable to parse swagger from " + url);
+        output.add(new SchemaValidationError(pm.asJson()));
+        return output;
+      }
     }
 
     java.util.Iterator<ProcessingMessage> it = lp.iterator();
@@ -308,7 +317,7 @@ public class ValidatorService {
     return ipAddress;
   }
 
-  private Swagger readSwagger(String text) {
+  private Swagger readSwagger(String text) throws IllegalArgumentException {
     if(text.trim().startsWith("{")) {
       return JsonMapper.convertValue(readNode(text), Swagger.class);
     }
