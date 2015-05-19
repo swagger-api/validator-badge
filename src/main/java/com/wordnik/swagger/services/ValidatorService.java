@@ -118,6 +118,9 @@ public class ValidatorService {
   }
 
   private String getVersion(JsonNode node) {
+    if(node == null) {
+      return null;
+    }
     JsonNode version = node.get("swagger");
     if(version != null) {
       return version.toString();
@@ -148,6 +151,14 @@ public class ValidatorService {
     JsonNode schemaObject = JsonMapper.readTree(getSchema());
 
     JsonNode spec = readNode(content);
+    if(spec == null) {
+      ProcessingMessage pm = new ProcessingMessage();
+      pm.setLogLevel(LogLevel.ERROR);
+      pm.setMessage("Unable to read content.  It may be invalid JSON or YAML");
+      output.add(new SchemaValidationError(pm.asJson()));
+      return output;
+    }
+
     String version = getVersion(spec);
 
     if(version != null && version.startsWith("\"1.")) {
@@ -160,7 +171,7 @@ public class ValidatorService {
 
     JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
     JsonSchema schema = factory.getJsonSchema(schemaObject);
-    ProcessingReport report = schema.validate(readNode(content));
+    ProcessingReport report = schema.validate(spec);
     ListProcessingReport lp = new ListProcessingReport();
     lp.mergeWith(report);
 
@@ -189,7 +200,21 @@ public class ValidatorService {
     JsonNode schemaObject = JsonMapper.readTree(getSchema());
     JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
     JsonSchema schema = factory.getJsonSchema(schemaObject);
-    ProcessingReport report = schema.validate(readNode(content));
+
+    List<SchemaValidationError> output = new ArrayList<SchemaValidationError>();
+
+    JsonNode spec = readNode(content);
+
+    if(spec == null) {
+      ProcessingMessage pm = new ProcessingMessage();
+      pm.setLogLevel(LogLevel.ERROR);
+      pm.setMessage("Unable to read content.  It may be invalid JSON or YAML");
+      output.add(new SchemaValidationError(pm.asJson()));
+      return output;
+    }
+
+    ProcessingReport report = schema.validate(spec);
+
     ListProcessingReport lp = new ListProcessingReport();
     lp.mergeWith(report);
 
@@ -198,8 +223,6 @@ public class ValidatorService {
       if(swagger != null) {
       }
     }
-
-    List<SchemaValidationError> output = new ArrayList<SchemaValidationError>();
     java.util.Iterator<ProcessingMessage> it = lp.iterator();
     while(it.hasNext()) {
       ProcessingMessage pm = it.next();
