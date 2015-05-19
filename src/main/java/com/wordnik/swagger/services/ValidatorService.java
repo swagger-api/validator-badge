@@ -1,6 +1,7 @@
 package com.wordnik.swagger.services;
 
 import com.wordnik.swagger.util.Json;
+import com.wordnik.swagger.util.Yaml;
 
 import com.wordnik.swagger.models.*;
 
@@ -33,8 +34,8 @@ public class ValidatorService {
   static String CACHED_SCHEMA = null;
   static String SCHEMA_FILE = "schema.json";
   static String SCHEMA_URL = "http://swagger.io/v2/schema.json";
-  static ObjectMapper JsonMapper = new ObjectMapper();
-  static ObjectMapper YamlMapper = new ObjectMapper(new YAMLFactory());
+  static ObjectMapper JsonMapper = Json.mapper();
+  static ObjectMapper YamlMapper = Yaml.mapper();
   Logger LOGGER = LoggerFactory.getLogger(ValidatorService.class);
   private JsonSchema schema;
 
@@ -78,7 +79,6 @@ public class ValidatorService {
   }
 
   public void validateByUrl(HttpServletRequest request, HttpServletResponse response, String url) {
-    System.out.println("validationUrl: " + url + ", forClient: " + getRemoteAddr(request) + ", method: get");
     if(url == null) {
       fail(response);
     }
@@ -91,38 +91,35 @@ public class ValidatorService {
           JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
           schema = factory.getJsonSchema(schemaObject);
         }
-        ProcessingReport report = schema.validate(JsonLoader.fromString(inputDoc));
+        ProcessingReport report = schema.validate(readNode(inputDoc));
         if(report.isSuccess()) {
           Swagger swagger = readSwagger(inputDoc);
           if(swagger != null) {
-            System.out.println("swaggerHost: " + swagger.getHost() + ", forClient: " + getRemoteAddr(request));
           }
           success(response);
         }
-        else
+        else {
           fail(response);
+        }
       }
       catch (Exception e) {
-        System.out.println(e.getMessage());
         error(response);
       }
     }
   }
 
   public List<SchemaValidationError> debugByUrl(HttpServletRequest request, HttpServletResponse response, String url) throws Exception {
-    System.out.println("validationUrl: " + url + ", forClient: " + getRemoteAddr(request) + ", method: get, debug: true");
     String content = getUrlContents(url);
     JsonNode schemaObject = JsonMapper.readTree(getSchema());
     JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
     JsonSchema schema = factory.getJsonSchema(schemaObject);
-    ProcessingReport report = schema.validate(JsonLoader.fromString(content));
+    ProcessingReport report = schema.validate(readNode(content));
     ListProcessingReport lp = new ListProcessingReport();
     lp.mergeWith(report);
 
     if(report.isSuccess()) {
-      Swagger swagger = Json.mapper().readValue(content, Swagger.class);
+      Swagger swagger = readSwagger(content);
       if(swagger != null) {
-        System.out.println("swaggerHost: " + swagger.getHost() + ", forClient: " + getRemoteAddr(request));
       }
     }
 
@@ -136,18 +133,16 @@ public class ValidatorService {
   }
 
   public List<SchemaValidationError> debugByContent(HttpServletRequest request, HttpServletResponse response, String content) throws Exception {
-    System.out.println("validationUrl: n/a, forClient: " + getRemoteAddr(request) + ", method: post, debug: true");
     JsonNode schemaObject = JsonMapper.readTree(getSchema());
     JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
     JsonSchema schema = factory.getJsonSchema(schemaObject);
-    ProcessingReport report = schema.validate(JsonLoader.fromString(content));
+    ProcessingReport report = schema.validate(readNode(content));
     ListProcessingReport lp = new ListProcessingReport();
     lp.mergeWith(report);
 
     if(report.isSuccess()) {
-      Swagger swagger = Json.mapper().readValue(content, Swagger.class);
+      Swagger swagger = readSwagger(content);
       if(swagger != null) {
-        System.out.println("swaggerHost: " + swagger.getHost() + ", forClient: " + getRemoteAddr(request));
       }
     }
 
@@ -239,6 +234,9 @@ public class ValidatorService {
       char c = (char)i;
       if(!Character.isISOControl(c))
         contents.append((char)i);
+      if(c == '\n') {
+        contents.append('\n');
+      }
     }
     in.close();
 
@@ -250,21 +248,29 @@ public class ValidatorService {
     if (ipAddress == null) {  
       ipAddress = request.getRemoteAddr();
     }
-
     return ipAddress;
   }
 
   private Swagger readSwagger(String text) {
+    if(text.trim().startsWith("{")) {
+      return JsonMapper.convertValue(readNode(text), Swagger.class);
+    }
+    else {
+      return YamlMapper.convertValue(readNode(text), Swagger.class);
+    }
+  }
+
+  private JsonNode readNode(String text) {
     try{
       if(text.trim().startsWith("{")) {
-        return JsonMapper.readValue(text, Swagger.class);
+        return JsonMapper.readTree(text);
       }
       else {
-        return YamlMapper.readValue(text, Swagger.class);
+        return YamlMapper.readTree(text);
       }
     }
     catch (IOException e) {
       return null;
-    }
+    }    
   }
 }
