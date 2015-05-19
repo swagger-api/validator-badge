@@ -2,7 +2,7 @@
 
 This project shows a "valid swagger" badge on your site.  There is an online version hosted on http://swagger.io.
 
-You can validate any swagger specification against the [Swagger 2.0 Schema]() as follows:
+You can validate any swagger specification against the [Swagger 2.0 Schema](https://github.com/swagger-api/swagger-spec/blob/master/schemas/v2.0/schema.json) as follows:
 
 ```
 <img src="http://online.swagger.io/validator?url={YOUR_URL}">
