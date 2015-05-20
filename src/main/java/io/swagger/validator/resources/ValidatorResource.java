@@ -1,8 +1,8 @@
-package com.wordnik.swagger.resources;
+package io.swagger.validator.resources;
 
-import com.wordnik.swagger.services.*;
+import io.swagger.validator.services.*;
 import com.wordnik.swagger.annotations.*;
-import com.wordnik.swagger.models.SchemaValidationError;
+import io.swagger.validator.models.SchemaValidationError;
 
 import com.github.fge.jsonschema.core.report.ProcessingReport;
 

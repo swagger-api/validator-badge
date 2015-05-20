@@ -1,4 +1,7 @@
-package com.wordnik.swagger.services;
+package io.swagger.validator.services;
+
+import io.swagger.validator.models.*;
+
 
 import com.wordnik.swagger.util.Json;
 import com.wordnik.swagger.util.Yaml;

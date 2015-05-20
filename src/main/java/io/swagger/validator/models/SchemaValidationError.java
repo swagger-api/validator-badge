@@ -1,4 +1,4 @@
-package com.wordnik.swagger.models;
+package io.swagger.validator.models;
 
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.node.*;
