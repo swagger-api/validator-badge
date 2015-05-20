@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.wordnik</groupId>
+  <groupId>io.swagger</groupId>
   <artifactId>swagger-validator</artifactId>
   <packaging>war</packaging>
   <name>swagger-validator</name>
@@ -85,6 +85,11 @@
       <version>${json-schema-validator-version}</version>
     </dependency>
     <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-yaml</artifactId>
+      <version>${jackson-version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.sun.jersey</groupId>
       <artifactId>jersey-core</artifactId>
       <version>${jersey-version}</version>
@@ -114,10 +119,11 @@
   <properties>
     <jersey-version>1.13</jersey-version>
     <commons-io-version>2.3</commons-io-version>
-    <swagger-core-version>1.5.0-SNAPSHOT</swagger-core-version>
+    <swagger-core-version>1.5.2-M2</swagger-core-version>
     <servlet-api-version>2.5</servlet-api-version>
     <jetty-version>8.1.11.v20130520</jetty-version>
     <json-schema-validator-version>2.2.5</json-schema-validator-version>
+    <jackson-version>2.4.2</jackson-version>
   </properties>
   <repositories>
     <repository>

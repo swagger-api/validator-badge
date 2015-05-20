@@ -1,4 +1,4 @@
-package com.wordnik.swagger.models;
+package io.swagger.validator.models;
 
 public class Schema {
   private String loadingURI, pointer;

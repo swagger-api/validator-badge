@@ -1,8 +1,8 @@
 # Swagger Validator Badge
 
-This project shows a "valid swagger" badge on your site.  Temporarily, there is an online version hosted on the Reverb petstore sample.
+This project shows a "valid swagger" badge on your site.  There is an online version hosted on http://swagger.io.
 
-You can validate any swagger specification against the [Swagger 2.0 Schema]() as follows:
+You can validate any swagger specification against the [Swagger 2.0 Schema](https://github.com/swagger-api/swagger-spec/blob/master/schemas/v2.0/schema.json) as follows:
 
 ```
 <img src="http://online.swagger.io/validator?url={YOUR_URL}">
@@ -17,3 +17,23 @@ For example, using [https://raw.githubusercontent.com/swagger-api/swagger-spec/m
 If your specification fails to validate for some reason, or if there is an error, you can get more information on why by visiting ```http://online.swagger.io/validator/debug?url={YOUR_URL}```.
 
 Since the validator uses a browserless back-end to fetch the contents and schema, it's not subject to the terrible world of CORS.
+
+### Running locally
+
+You can build and run the validator locally:
+
+```
+mvn package jetty:run
+```
+
+And access the validator like such:
+
+```
+http://localhost:8002/?url={URL}
+```
+
+or
+
+```
+http://localhost:8002/?url=http://petstore.swagger.io/v2/swagger.json
+```
