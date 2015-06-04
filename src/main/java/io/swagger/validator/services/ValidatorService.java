@@ -1,23 +1,18 @@
 package io.swagger.validator.services;
 
+import io.swagger.models.Swagger;
+import io.swagger.util.Json;
+import io.swagger.util.Yaml;
 import io.swagger.validator.models.*;
 
 
-import com.wordnik.swagger.util.Json;
-import com.wordnik.swagger.util.Yaml;
-
-import com.wordnik.swagger.models.*;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 
 import org.apache.commons.io.IOUtils;
 
-import com.github.fge.jsonschema.core.exceptions.ProcessingException;
 import com.github.fge.jsonschema.main.*;
 import com.github.fge.jsonschema.core.report.*;
-import com.github.fge.jackson.JsonLoader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +24,6 @@ import java.util.*;
 import java.security.*;
 import java.security.cert.X509Certificate;
 import javax.net.ssl.*;
-import javax.servlet.*;
 import javax.servlet.http.*;
 
 public class ValidatorService {
