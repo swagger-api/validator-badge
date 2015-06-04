@@ -1,16 +1,15 @@
 package io.swagger.validator.resources;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponses;
 import io.swagger.validator.services.*;
-import com.wordnik.swagger.annotations.*;
 import io.swagger.validator.models.SchemaValidationError;
-
-import com.github.fge.jsonschema.core.report.ProcessingReport;
 
 import javax.ws.rs.core.*;
 import javax.ws.rs.*;
 import javax.servlet.http.*;
-
-import java.util.*;
 
 @Path("/")
 @Api(value = "/validator", description = "Validator for Swagger Specs")
