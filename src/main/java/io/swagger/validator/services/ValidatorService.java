@@ -234,44 +234,23 @@ public class ValidatorService {
     }
 
     private void success(HttpServletResponse response) {
-        try {
-            String name = "valid.png";
-            InputStream is = this.getClass().getClassLoader().getResourceAsStream(name);
-            if (is != null) {
-                IOUtils.copy(is, response.getOutputStream());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        writeToResponse(response, "valid.png");
     }
 
     private void error(HttpServletResponse response) {
-        try {
-            String name = "error.png";
-            InputStream is = this.getClass().getClassLoader().getResourceAsStream(name);
-            if (is != null) {
-                IOUtils.copy(is, response.getOutputStream());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        writeToResponse(response, "error.png");
     }
 
     private void fail(HttpServletResponse response) {
-        try {
-            String name = "invalid.png";
-            InputStream is = this.getClass().getClassLoader().getResourceAsStream(name);
-            if (is != null) {
-                IOUtils.copy(is, response.getOutputStream());
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        writeToResponse(response, "invalid.png");
     }
 
     private void upgrade(HttpServletResponse response) {
+        writeToResponse(response, "upgrade.png");
+    }
+
+    private void writeToResponse(HttpServletResponse response, String name) {
         try {
-            String name = "upgrade.png";
             InputStream is = this.getClass().getClassLoader().getResourceAsStream(name);
             if (is != null) {
                 IOUtils.copy(is, response.getOutputStream());
