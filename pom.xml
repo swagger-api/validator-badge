@@ -40,7 +40,6 @@
                         <contextPath>/</contextPath>
                     </webAppConfig>
                     <webAppSourceDirectory>target/${project.artifactId}-${project.version}</webAppSourceDirectory>
-                    <webDefaultXml>${project.basedir}/conf/jetty/webdefault.xml</webDefaultXml>
                     <stopPort>8079</stopPort>
                     <stopKey>stopit</stopKey>
                     <connectors>
@@ -81,6 +80,11 @@
             <version>${swagger-core-version}</version>
         </dependency>
         <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-parser</artifactId>
+            <version>${swagger-parser-version}</version>
+        </dependency>
+        <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
             <version>${servlet-api-version}</version>
@@ -119,13 +123,24 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>${commons-io-version}</version>
-            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${logback-version}</version>
         </dependency>
     </dependencies>
     <properties>
+        <logback-version>1.0.1</logback-version>
         <jersey-version>1.13</jersey-version>
         <commons-io-version>2.3</commons-io-version>
         <swagger-core-version>1.5.4-SNAPSHOT</swagger-core-version>
+        <swagger-parser-version>1.0.11-SNAPSHOT</swagger-parser-version>
         <servlet-api-version>2.5</servlet-api-version>
         <jetty-version>8.1.11.v20130520</jetty-version>
         <json-schema-validator-version>2.2.5</json-schema-validator-version>
