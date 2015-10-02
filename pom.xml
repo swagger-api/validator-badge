@@ -125,7 +125,7 @@
     <properties>
         <jersey-version>1.13</jersey-version>
         <commons-io-version>2.3</commons-io-version>
-        <swagger-core-version>1.5.3</swagger-core-version>
+        <swagger-core-version>1.5.4-SNAPSHOT</swagger-core-version>
         <servlet-api-version>2.5</servlet-api-version>
         <jetty-version>8.1.11.v20130520</jetty-version>
         <json-schema-validator-version>2.2.5</json-schema-validator-version>
