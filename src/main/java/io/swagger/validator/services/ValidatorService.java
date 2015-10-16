@@ -9,6 +9,7 @@ import com.github.fge.jsonschema.core.report.ProcessingReport;
 import com.github.fge.jsonschema.main.JsonSchema;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import io.swagger.models.Swagger;
+import io.swagger.parser.SwaggerParser;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
 import io.swagger.validator.models.SchemaValidationError;
@@ -37,14 +38,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ValidatorService {
+    static Logger LOGGER = LoggerFactory.getLogger(ValidatorService.class);
     static long LAST_FETCH = 0;
     static String CACHED_SCHEMA = null;
     static String SCHEMA_FILE = "schema.json";
     static String SCHEMA_URL = "http://swagger.io/v2/schema.json";
     static ObjectMapper JsonMapper = Json.mapper();
     static ObjectMapper YamlMapper = Yaml.mapper();
-    Logger LOGGER = LoggerFactory.getLogger(ValidatorService.class);
     private JsonSchema schema;
+
+    static {
+        LOGGER.info("disabling SSL verification");
+        disableSslVerification();
+    }
 
     private static void disableSslVerification() {
         try {
@@ -78,14 +84,17 @@ public class ValidatorService {
             // Install the all-trusting host verifier
             HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            LOGGER.error("can't disable SSL verification", e);
         } catch (KeyManagementException e) {
-            e.printStackTrace();
+            LOGGER.error("can't disable SSL verification", e);
         }
     }
 
     public void validateByUrl(HttpServletRequest request, HttpServletResponse response, String url) {
+        LOGGER.info("validationUrl: " + url + ", forClient: " + getRemoteAddr(request));
+
         if (url == null) {
+            LOGGER.debug("no URL passed");
             fail(response);
         } else {
             try {
@@ -106,7 +115,7 @@ public class ValidatorService {
 
                 ProcessingReport report = schema.validate(spec);
                 if (report.isSuccess()) {
-                    Swagger swagger = readSwagger(inputDoc);
+                    Swagger swagger = readSwagger(spec);
                     if (swagger != null) {
                         success(response);
                     } else {
@@ -116,6 +125,7 @@ public class ValidatorService {
                     fail(response);
                 }
             } catch (Exception e) {
+                LOGGER.debug("failed to verify by URL: " + url, e);
                 error(response);
             }
         }
@@ -133,6 +143,7 @@ public class ValidatorService {
         if (version != null) {
             return version.toString();
         }
+        LOGGER.debug("version not found!");
         return null;
     }
 
@@ -180,8 +191,10 @@ public class ValidatorService {
 
         if (report.isSuccess()) {
             try {
-                readSwagger(content);
+                readSwagger(spec);
             } catch (IllegalArgumentException e) {
+                LOGGER.debug("can't read swagger contents", e);
+
                 ProcessingMessage pm = new ProcessingMessage();
                 pm.setLogLevel(LogLevel.ERROR);
                 pm.setMessage("unable to parse swagger from " + url);
@@ -221,9 +234,7 @@ public class ValidatorService {
         lp.mergeWith(report);
 
         if (report.isSuccess()) {
-            Swagger swagger = readSwagger(content);
-            if (swagger != null) {
-            }
+            Swagger swagger = readSwagger(spec);
         }
         java.util.Iterator<ProcessingMessage> it = lp.iterator();
         while (it.hasNext()) {
@@ -256,7 +267,7 @@ public class ValidatorService {
                 IOUtils.copy(is, response.getOutputStream());
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.error("can't send response image", e);
         }
     }
 
@@ -265,10 +276,12 @@ public class ValidatorService {
             return CACHED_SCHEMA;
         }
         try {
+            LOGGER.debug("returning cached schema");
             LAST_FETCH = System.currentTimeMillis();
             CACHED_SCHEMA = getUrlContents(SCHEMA_URL);
             return CACHED_SCHEMA;
         } catch (Exception e) {
+            LOGGER.warn("fetching schema from GitHub");
             InputStream is = this.getClass().getClassLoader().getResourceAsStream(SCHEMA_FILE);
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(is));
@@ -286,10 +299,10 @@ public class ValidatorService {
     }
 
     private String getUrlContents(String urlString) throws IOException {
+        LOGGER.debug("fetching URL contents");
         System.setProperty("jsse.enableSNIExtension", "false");
 
         URL url = new URL(urlString);
-
         URLConnection urlc = url.openConnection();
         urlc.setRequestProperty("Accept", "application/json, */*");
         urlc.connect();
@@ -318,12 +331,9 @@ public class ValidatorService {
         return ipAddress;
     }
 
-    private Swagger readSwagger(String text) throws IllegalArgumentException {
-        if (text.trim().startsWith("{")) {
-            return JsonMapper.convertValue(readNode(text), Swagger.class);
-        } else {
-            return YamlMapper.convertValue(readNode(text), Swagger.class);
-        }
+    private Swagger readSwagger(JsonNode node) throws IllegalArgumentException {
+        SwaggerParser parser = new SwaggerParser();
+        return parser.read(node, false);
     }
 
     private JsonNode readNode(String text) {
@@ -336,10 +346,5 @@ public class ValidatorService {
         } catch (IOException e) {
             return null;
         }
-    }
-
-    static {
-        disableSslVerification();
-
     }
 }
