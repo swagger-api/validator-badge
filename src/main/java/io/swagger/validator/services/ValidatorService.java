@@ -125,7 +125,7 @@ public class ValidatorService {
                     fail(response);
                 }
             } catch (Exception e) {
-                LOGGER.debug("failed to verify by URL: " + url, e);
+                LOGGER.trace("failed to verify by URL: " + url, e);
                 error(response);
             }
         }
@@ -299,7 +299,7 @@ public class ValidatorService {
     }
 
     private String getUrlContents(String urlString) throws IOException {
-        LOGGER.debug("fetching URL contents");
+        LOGGER.trace("fetching URL contents");
         System.setProperty("jsse.enableSNIExtension", "false");
 
         URL url = new URL(urlString);
