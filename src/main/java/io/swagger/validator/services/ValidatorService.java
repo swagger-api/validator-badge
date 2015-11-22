@@ -10,6 +10,7 @@ import com.github.fge.jsonschema.main.JsonSchema;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
 import io.swagger.models.Swagger;
 import io.swagger.parser.SwaggerParser;
+import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
 import io.swagger.validator.models.SchemaValidationError;
@@ -115,7 +116,7 @@ public class ValidatorService {
 
                 ProcessingReport report = schema.validate(spec);
                 if (report.isSuccess()) {
-                    Swagger swagger = readSwagger(spec);
+                    Swagger swagger = readSwagger(inputDoc);
                     if (swagger != null) {
                         success(response);
                     } else {
@@ -191,7 +192,8 @@ public class ValidatorService {
 
         if (report.isSuccess()) {
             try {
-                readSwagger(spec);
+                SwaggerParser parser = new SwaggerParser();
+                readSwagger(content);
             } catch (IllegalArgumentException e) {
                 LOGGER.debug("can't read swagger contents", e);
 
@@ -234,7 +236,7 @@ public class ValidatorService {
         lp.mergeWith(report);
 
         if (report.isSuccess()) {
-            Swagger swagger = readSwagger(spec);
+            Swagger swagger = readSwagger(content);
         }
         java.util.Iterator<ProcessingMessage> it = lp.iterator();
         while (it.hasNext()) {
@@ -331,9 +333,10 @@ public class ValidatorService {
         return ipAddress;
     }
 
-    private Swagger readSwagger(JsonNode node) throws IllegalArgumentException {
+    private Swagger readSwagger(String content) throws IllegalArgumentException {
         SwaggerParser parser = new SwaggerParser();
-        return parser.read(node, false);
+        SwaggerDeserializationResult output = parser.readWithInfo(content);
+        return output.getSwagger();
     }
 
     private JsonNode readNode(String text) {
