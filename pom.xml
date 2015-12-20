@@ -17,11 +17,11 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>2.1.1</version>
+                <version>2.6</version>
             </plugin>
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
-                <version>2.6</version>
+                <version>2.19</version>
                 <executions>
                     <execution>
                         <goals>
@@ -32,7 +32,7 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.mortbay.jetty</groupId>
+                <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>${jetty-version}</version>
                 <configuration>
@@ -42,13 +42,9 @@
                     <webAppSourceDirectory>target/${project.artifactId}-${project.version}</webAppSourceDirectory>
                     <stopPort>8079</stopPort>
                     <stopKey>stopit</stopKey>
-                    <connectors>
-                        <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
-                            <port>8002</port>
-                            <maxIdleTime>60000</maxIdleTime>
-                            <confidentialPort>8443</confidentialPort>
-                        </connector>
-                    </connectors>
+                    <httpConnector>
+                      <port>${jetty.http.port}</port>
+                    </httpConnector>
                 </configuration>
                 <executions>
                     <execution>
@@ -78,6 +74,12 @@
             <groupId>io.swagger</groupId>
             <artifactId>swagger-jaxrs</artifactId>
             <version>${swagger-core-version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>javax.ws.rs</groupId>
+                    <artifactId>jsr311-api</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
@@ -86,7 +88,7 @@
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
+            <artifactId>javax.servlet-api</artifactId>
             <version>${servlet-api-version}</version>
         </dependency>
         <dependency>
@@ -99,19 +101,29 @@
             <artifactId>jackson-dataformat-yaml</artifactId>
             <version>${jackson-version}</version>
         </dependency>
+        <!-- <dependency>
+            <groupId>com.fasterxml.jackson.jaxrs</groupId>
+            <artifactId>jackson-jaxrs-json-provider</artifactId>
+            <version>$(jackson-version)</version>
+        </dependency> -->
         <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-core</artifactId>
+            <groupId>org.glassfish.jersey.containers</groupId>
+            <artifactId>jersey-container-servlet</artifactId>
             <version>${jersey-version}</version>
         </dependency>
         <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-json</artifactId>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-server</artifactId>
             <version>${jersey-version}</version>
         </dependency>
         <dependency>
-            <groupId>com.sun.jersey</groupId>
-            <artifactId>jersey-servlet</artifactId>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-common</artifactId>
+            <version>${jersey-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.glassfish.jersey.core</groupId>
+            <artifactId>jersey-client</artifactId>
             <version>${jersey-version}</version>
         </dependency>
         <dependency>
@@ -125,26 +137,54 @@
             <version>${commons-io-version}</version>
         </dependency>
         <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${httpclient-version}</version>
+        </dependency>
+        <!-- FIX FOR: Class path contains multiple SLF4J bindings -->
+        <!-- <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>${logback-version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion> 
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions> 
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
             <version>${logback-version}</version>
-        </dependency>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion> 
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions> 
+        </dependency> -->
     </dependencies>
     <properties>
-        <logback-version>1.0.1</logback-version>
-        <jersey-version>1.13</jersey-version>
-        <commons-io-version>2.3</commons-io-version>
+        <jetty.http.port>8002</jetty.http.port>
+        <!-- <logback-version>1.1.3</logback-version> -->
+        <jersey-version>2.22.1</jersey-version>
+        <commons-io-version>2.4</commons-io-version>
+        <httpclient-version>4.5.1</httpclient-version>
         <swagger-core-version>1.5.4</swagger-core-version>
         <swagger-parser-version>1.0.13</swagger-parser-version>
-        <servlet-api-version>2.5</servlet-api-version>
-        <jetty-version>8.1.11.v20130520</jetty-version>
+        <servlet-api-version>3.1.0</servlet-api-version>
+        <jetty-version>9.2.14.v20151106</jetty-version>
         <json-schema-validator-version>2.2.6</json-schema-validator-version>
-        <jackson-version>2.4.5</jackson-version>
+        <jackson-version>2.6.4</jackson-version>
     </properties>
     <repositories>
         <repository>
