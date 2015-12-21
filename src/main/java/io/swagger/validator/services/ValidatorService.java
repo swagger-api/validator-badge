@@ -15,25 +15,29 @@ import io.swagger.util.Json;
 import io.swagger.util.Yaml;
 import io.swagger.validator.models.SchemaValidationError;
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.conn.ssl.NoopHostnameVerifier;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.SSLContextBuilder;
+import org.apache.http.ssl.TrustStrategy;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.net.ssl.HostnameVerifier;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
 import java.security.KeyManagementException;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,49 +51,6 @@ public class ValidatorService {
     static ObjectMapper JsonMapper = Json.mapper();
     static ObjectMapper YamlMapper = Yaml.mapper();
     private JsonSchema schema;
-
-    static {
-        LOGGER.info("disabling SSL verification");
-        disableSslVerification();
-    }
-
-    private static void disableSslVerification() {
-        try {
-            // Create a trust manager that does not validate certificate chains
-            TrustManager[] trustAllCerts = new TrustManager[]{
-                    new X509TrustManager() {
-                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                            return null;
-                        }
-
-                        public void checkClientTrusted(X509Certificate[] certs, String authType) {
-                        }
-
-                        public void checkServerTrusted(X509Certificate[] certs, String authType) {
-                        }
-                    }
-            };
-
-            // Install the all-trusting trust manager
-            SSLContext sc = SSLContext.getInstance("SSL");
-            sc.init(null, trustAllCerts, new java.security.SecureRandom());
-            HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-
-            // Create all-trusting host name verifier
-            HostnameVerifier allHostsValid = new HostnameVerifier() {
-                public boolean verify(String hostname, SSLSession session) {
-                    return true;
-                }
-            };
-
-            // Install the all-trusting host verifier
-            HttpsURLConnection.setDefaultHostnameVerifier(allHostsValid);
-        } catch (NoSuchAlgorithmException e) {
-            LOGGER.error("can't disable SSL verification", e);
-        } catch (KeyManagementException e) {
-            LOGGER.error("can't disable SSL verification", e);
-        }
-    }
 
     public void validateByUrl(HttpServletRequest request, HttpServletResponse response, String url) {
         LOGGER.info("validationUrl: " + url + ", forClient: " + getRemoteAddr(request));
@@ -300,29 +261,51 @@ public class ValidatorService {
         }
     }
 
+    private CloseableHttpClient getCarelessHttpClient() {
+        CloseableHttpClient httpClient = null;
+
+        try {
+            SSLContextBuilder builder = new SSLContextBuilder();
+            builder.loadTrustMaterial(null, new TrustStrategy() {
+                public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                    return true;
+                }
+            });
+            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build(), NoopHostnameVerifier.INSTANCE);
+            httpClient = HttpClients
+                    .custom()
+                    .setSSLSocketFactory(sslsf)
+                    .build();
+        } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
+            LOGGER.error("can't disable SSL verification", e);
+        }
+
+        return httpClient;
+    }
+
     private String getUrlContents(String urlString) throws IOException {
         LOGGER.trace("fetching URL contents");
-        System.setProperty("jsse.enableSNIExtension", "false");
+        // System.setProperty("jsse.enableSNIExtension", "false");
+        // System.setProperty("javax.net.debug", "all");
 
-        URL url = new URL(urlString);
-        URLConnection urlc = url.openConnection();
-        urlc.setRequestProperty("Accept", "application/json, */*");
-        urlc.connect();
+        HttpGet getMethod = new HttpGet(urlString);
+        getMethod.setHeader("Accept", "application/json, */*");
 
-        StringBuilder contents = new StringBuilder();
-        InputStream in = urlc.getInputStream();
-        for (int i = 0; i != -1; i = in.read()) {
-            char c = (char) i;
-            if (!Character.isISOControl(c)) {
-                contents.append((char) i);
+        final CloseableHttpClient httpClient = getCarelessHttpClient();
+
+        if (httpClient != null) {
+            final CloseableHttpResponse response = httpClient.execute(getMethod);
+
+            try {
+                HttpEntity entity = response.getEntity();
+                return EntityUtils.toString(entity, "UTF-8");
+            } finally {
+                response.close();
+                httpClient.close();
             }
-            if (c == '\n') {
-                contents.append('\n');
-            }
+        } else {
+            throw new IOException("CloseableHttpClient could not be initialized");
         }
-        in.close();
-
-        return contents.toString();
     }
 
     protected String getRemoteAddr(HttpServletRequest request) {
