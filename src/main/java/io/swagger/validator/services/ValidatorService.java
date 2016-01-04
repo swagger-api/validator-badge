@@ -12,7 +12,7 @@ import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
-import io.swagger.validator.models.ResponsePayload;
+import io.swagger.validator.models.ValidationResponse;
 import io.swagger.validator.models.SchemaValidationError;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
@@ -56,7 +56,7 @@ public class ValidatorService {
     public void validateByUrl(HttpServletRequest request, HttpServletResponse response, String url) {
         LOGGER.info("validationUrl: " + url + ", forClient: " + getRemoteAddr(request));
 
-        ResponsePayload payload = null;
+        ValidationResponse payload = null;
 
         try {
             payload = debugByUrl(request, response, url);
@@ -96,8 +96,8 @@ public class ValidatorService {
         return null;
     }
 
-    public ResponsePayload debugByUrl(HttpServletRequest request, HttpServletResponse response, String url) throws Exception {
-        ResponsePayload output = new ResponsePayload();
+    public ValidationResponse debugByUrl(HttpServletRequest request, HttpServletResponse response, String url) throws Exception {
+        ValidationResponse output = new ValidationResponse();
         String content;
 
         // read the spec contents, bail if it fails
@@ -169,11 +169,11 @@ public class ValidatorService {
         return output;
     }
 
-    public ResponsePayload debugByContent(HttpServletRequest request, HttpServletResponse response, String content) throws Exception {
+    public ValidationResponse debugByContent(HttpServletRequest request, HttpServletResponse response, String content) throws Exception {
         JsonNode schemaObject = JsonMapper.readTree(getSchema());
         JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
         JsonSchema schema = factory.getJsonSchema(schemaObject);
-        ResponsePayload output = new ResponsePayload();
+        ValidationResponse output = new ValidationResponse();
 
         JsonNode spec = readNode(content);
 

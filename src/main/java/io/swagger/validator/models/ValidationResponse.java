@@ -3,7 +3,7 @@ package io.swagger.validator.models;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ResponsePayload {
+public class ValidationResponse {
     private List<String> messages;
     private List<SchemaValidationError> schemaValidationMessages = null;
 

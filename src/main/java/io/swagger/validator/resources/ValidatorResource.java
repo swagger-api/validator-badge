@@ -4,17 +4,12 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponses;
-import io.swagger.validator.models.SchemaValidationError;
+import io.swagger.validator.models.ValidationResponse;
 import io.swagger.validator.services.ValidatorService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 
@@ -44,7 +39,7 @@ public class ValidatorResource {
     @Path("/debug")
     @Produces({"application/json"})
     @ApiOperation(value = "Validates a spec based on a URL",
-            response = SchemaValidationError.class,
+            response = ValidationResponse.class,
             responseContainer = "List")
     @ApiResponses(value = {})
     public Response debugByUrl(
@@ -63,7 +58,7 @@ public class ValidatorResource {
     @Path("/debug")
     @Produces({"application/json"})
     @ApiOperation(value = "Validates a spec based on a URL",
-            response = SchemaValidationError.class,
+            response = ValidationResponse.class,
             responseContainer = "List")
     @ApiResponses(value = {})
     public Response debugByContent(
