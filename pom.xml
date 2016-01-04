@@ -109,11 +109,6 @@
             <artifactId>jackson-dataformat-yaml</artifactId>
             <version>${jackson-version}</version>
         </dependency>
-        <!-- <dependency>
-            <groupId>com.fasterxml.jackson.jaxrs</groupId>
-            <artifactId>jackson-jaxrs-json-provider</artifactId>
-            <version>$(jackson-version)</version>
-        </dependency> -->
         <dependency>
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-servlet</artifactId>
