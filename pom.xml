@@ -150,7 +150,7 @@
             <version>${httpclient-version}</version>
         </dependency>
         <!-- FIX FOR: Class path contains multiple SLF4J bindings -->
-        <!-- <dependency>
+        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>${logback-version}</version>
@@ -179,16 +179,16 @@
                     <artifactId>log4j</artifactId>
                 </exclusion>
             </exclusions> 
-        </dependency> -->
+        </dependency>
     </dependencies>
     <properties>
         <jetty.http.port>8002</jetty.http.port>
-        <!-- <logback-version>1.1.3</logback-version> -->
+        <logback-version>1.1.3</logback-version>
         <jersey-version>2.22.1</jersey-version>
         <commons-io-version>2.4</commons-io-version>
         <httpclient-version>4.5.1</httpclient-version>
-        <swagger-core-version>1.5.4</swagger-core-version>
-        <swagger-parser-version>1.0.13</swagger-parser-version>
+        <swagger-core-version>1.5.5</swagger-core-version>
+        <swagger-parser-version>1.0.14</swagger-parser-version>
         <servlet-api-version>3.1.0</servlet-api-version>
         <jetty-version>9.2.14.v20151106</jetty-version>
         <json-schema-validator-version>2.2.6</json-schema-validator-version>
