@@ -236,7 +236,7 @@
         <swagger-core-version>1.5.5</swagger-core-version>
         <swagger-parser-version>1.0.14</swagger-parser-version>
         <servlet-api-version>3.1.0</servlet-api-version>
-        <jetty-version>9.2.14.v20151106</jetty-version>
+        <jetty-version>9.2.9.v20150224</jetty-version>
         <json-schema-validator-version>2.2.6</json-schema-validator-version>
         <jackson-version>2.6.4</jackson-version>
     </properties>
