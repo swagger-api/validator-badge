@@ -219,6 +219,12 @@
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-runner</artifactId>
             <version>${jetty-version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.glassfish</groupId>
+                    <artifactId>javax.el</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
     <properties>
