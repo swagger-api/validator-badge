@@ -65,6 +65,10 @@ public class ValidatorService {
             error(response);
         }
 
+        if(payload == null) {
+            fail(response);
+            return;
+        }
         if(payload.getMessages() == null && payload.getSchemaValidationMessages() == null) {
             success(response);
         }
