@@ -1,7 +1,7 @@
 # Swagger Validator Badge
 
 [![Build Status](https://travis-ci.org/swagger-api/validator-badge.svg?branch=master)](https://travis-ci.org/swagger-api/validator-badge)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.swagger/validator-badge/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/io.swagger/validator-badge)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-validator/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-validator)
 
 This project shows a "valid swagger" badge on your site.  There is an online version hosted on http://swagger.io.
 
