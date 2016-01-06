@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/swagger-api/validator-badge.svg?branch=master)](https://travis-ci.org/swagger-api/validator-badge)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-validator/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-validator)
 
-This project shows a "valid swagger" badge on your site.  There is an online version hosted on http://swagger.io.
+This project shows a "valid swagger" badge on your site.  There is an online version hosted on http://swagger.io.  You can also pull a docker image of the validator directly from [DockerHub](https://hub.docker.com/r/swaggerapi/swagger-validator/).
 
 You can validate any OpenAPI specification against the [OpenAPI 2.0 Schema](https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v2.0/schema.json) as follows:
 
