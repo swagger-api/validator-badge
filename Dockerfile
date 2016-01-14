@@ -3,7 +3,7 @@ FROM java:8
 WORKDIR /validator
 COPY target/lib/jetty-runner* /validator/jetty-runner.jar
 COPY bin/run.sh /validator/
-ADD target/swagger-validator-1.0.3 /validator/webapp
+ADD target/swagger-validator-1.0.4-SNAPSHOT /validator/webapp
 
 RUN apt-get update
 
