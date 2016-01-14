@@ -2,9 +2,10 @@ FROM java:8
 
 WORKDIR /validator
 COPY target/lib/jetty-runner* /validator/jetty-runner.jar
-COPY target/*.war /validator/swagger-validator.war
+COPY bin/run.sh /validator/
+ADD target/swagger-validator-1.0.3 /validator/webapp
 
 RUN apt-get update
 
 EXPOSE 8080
-CMD ["java", "-jar", "/validator/jetty-runner.jar", "/validator/swagger-validator.war"]
+CMD ["bash", "/validator/run.sh"]
