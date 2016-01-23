@@ -61,10 +61,9 @@ public class SchemaValidationError {
         }
 
         prop = node.get("required");
-        if (prop != null) {
+        if (prop != null && prop.isArray()) {
             ArrayNode an = (ArrayNode) prop;
         }
-
     }
 
     public String getLevel() {
