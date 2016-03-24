@@ -41,6 +41,20 @@ or
 http://localhost:8002/?url=http://petstore.swagger.io/v2/swagger.json
 ```
 
+### Running from docker
+
+Running the docker
+
+```
+docker-compose up
+```
+
+Using the service from docker
+
+```
+http://$(docker-machine ip default):8080/?url=http://petstore.swagger.io/v2/swagger.json
+```
+
 ---
 <img src="http://swagger.io/wp-content/uploads/2016/02/logo.jpg"/>
 
