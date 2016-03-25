@@ -72,6 +72,19 @@ public class ValidatorService {
         if(payload.getMessages() == null && payload.getSchemaValidationMessages() == null) {
             success(response);
         }
+        // some values may be unsupported, and that shouldn't invalidate the spec
+
+        if(payload.getMessages() != null && payload.getMessages().size() > 0) {
+            boolean valid = true;
+            for(String message : payload.getMessages()) {
+                if(!message.endsWith("is unsupported")) {
+                    valid = false;
+                }
+            }
+            if(valid) {
+                success(response);
+            }
+        }
 
         if(payload.getSchemaValidationMessages() != null) {
             for(SchemaValidationError message : payload.getSchemaValidationMessages()) {
