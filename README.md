@@ -40,3 +40,7 @@ or
 ```
 http://localhost:8002/?url=http://petstore.swagger.io/v2/swagger.json
 ```
+
+---
+<img src="http://swagger.io/wp-content/uploads/2016/02/logo.jpg"/>
+
