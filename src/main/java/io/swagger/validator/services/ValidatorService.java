@@ -12,11 +12,12 @@ import io.swagger.parser.SwaggerParser;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.util.Json;
 import io.swagger.util.Yaml;
-import io.swagger.validator.models.ValidationResponse;
 import io.swagger.validator.models.SchemaValidationError;
+import io.swagger.validator.models.ValidationResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
@@ -73,7 +74,6 @@ public class ValidatorService {
             success(response);
         }
         // some values may be unsupported, and that shouldn't invalidate the spec
-
         if(payload.getMessages() != null && payload.getMessages().size() > 0) {
             boolean valid = true;
             for(String message : payload.getMessages()) {
@@ -315,13 +315,18 @@ public class ValidatorService {
 
     private String getUrlContents(String urlString) throws IOException {
         LOGGER.trace("fetching URL contents");
-        // System.setProperty("jsse.enableSNIExtension", "false");
-        // System.setProperty("javax.net.debug", "all");
-
-        HttpGet getMethod = new HttpGet(urlString);
-        getMethod.setHeader("Accept", "application/json, */*");
 
         final CloseableHttpClient httpClient = getCarelessHttpClient();
+
+        RequestConfig.Builder requestBuilder = RequestConfig.custom();
+        requestBuilder = requestBuilder
+                .setConnectTimeout(2000)
+                .setSocketTimeout(2000);
+
+        HttpGet getMethod = new HttpGet(urlString);
+        getMethod.setConfig(requestBuilder.build());
+        getMethod.setHeader("Accept", "application/json, */*");
+
 
         if (httpClient != null) {
             final CloseableHttpResponse response = httpClient.execute(getMethod);
