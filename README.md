@@ -21,6 +21,7 @@ If your specification fails to validate for some reason, or if there is an error
 
 Since the validator uses a browserless back-end to fetch the contents and schema, it's not subject to the terrible world of CORS.
 
+
 ### Running locally
 
 You can build and run the validator locally:
