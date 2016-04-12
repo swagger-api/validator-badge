@@ -9,7 +9,7 @@
         <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
         <init-param>
             <param-name>jersey.config.server.provider.packages</param-name>
-            <param-value>io.swagger.jaxrs.json;io.swagger.validator.resources</param-value>
+            <param-value>io.swagger.jaxrs.json;io.swagger.validator.resources;io.swagger.validator.util</param-value>
         </init-param>
         <init-param>
             <param-name>javax.ws.rs.Application</param-name>
