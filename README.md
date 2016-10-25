@@ -21,6 +21,13 @@ If your specification fails to validate for some reason, or if there is an error
 
 Since the validator uses a browserless back-end to fetch the contents and schema, it's not subject to the terrible world of CORS.
 
+You can also post a spec up to the service with CURL:
+
+```
+curl -X POST -d @swagger.json -H 'Content-Type:application/json' http://online.swagger.io/validator/debug
+```
+
+In this example, `swagger.json` is the swagger definition in JSON format, in the CWD.
 
 ### Running locally
 
