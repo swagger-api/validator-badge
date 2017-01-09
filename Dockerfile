@@ -1,4 +1,4 @@
-FROM java:8
+from openjdk:8-jre
 
 WORKDIR /validator
 COPY target/lib/jetty-runner* /validator/jetty-runner.jar
