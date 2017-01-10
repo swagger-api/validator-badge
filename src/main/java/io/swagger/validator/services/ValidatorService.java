@@ -15,6 +15,7 @@ import io.swagger.util.Yaml;
 import io.swagger.validator.models.SchemaValidationError;
 import io.swagger.validator.models.ValidationResponse;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.client.config.RequestConfig;
@@ -117,10 +118,18 @@ public class ValidatorService {
         ValidationResponse output = new ValidationResponse();
         String content;
 
+        if(StringUtils.isBlank(url)) {
+            ProcessingMessage pm = new ProcessingMessage();
+            pm.setLogLevel(LogLevel.ERROR);
+            pm.setMessage("No valid URL specified");
+            output.addValidationMessage(new SchemaValidationError(pm.asJson()));
+            return output;
+        }
+
         // read the spec contents, bail if it fails
         try {
             content = getUrlContents(url);
-        } catch (IOException e) {
+        } catch (Exception e) {
             ProcessingMessage pm = new ProcessingMessage();
             pm.setLogLevel(LogLevel.ERROR);
             pm.setMessage("Can't read from file " + url);
@@ -320,8 +329,8 @@ public class ValidatorService {
 
         RequestConfig.Builder requestBuilder = RequestConfig.custom();
         requestBuilder = requestBuilder
-                .setConnectTimeout(2000)
-                .setSocketTimeout(2000);
+                .setConnectTimeout(5000)
+                .setSocketTimeout(5000);
 
         HttpGet getMethod = new HttpGet(urlString);
         getMethod.setConfig(requestBuilder.build());
