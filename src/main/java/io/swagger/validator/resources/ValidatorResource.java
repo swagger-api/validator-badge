@@ -57,7 +57,7 @@ public class ValidatorResource {
     @POST
     @Path("/debug")
     @Produces({"application/json"})
-    @ApiOperation(value = "Validates a spec based on a URL",
+    @ApiOperation(value = "Validates a spec based on message body",
             response = ValidationResponse.class,
             responseContainer = "List")
     @ApiResponses(value = {})
