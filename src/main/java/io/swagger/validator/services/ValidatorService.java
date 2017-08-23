@@ -263,6 +263,7 @@ public class ValidatorService {
     }
 
     private void writeToResponse(HttpServletResponse response, String name) {
+        response.addHeader("Content-Type", "image/png");
         try {
             InputStream is = this.getClass().getClassLoader().getResourceAsStream(name);
             if (is != null) {
