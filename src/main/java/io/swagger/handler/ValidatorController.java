@@ -75,14 +75,6 @@ public class ValidatorController{
                     .entity( "No specification supplied in either the url or request body.  Try again?" );
         }
 
-        //TODO
-        // 1. Get Version of the URL OR CONTENT
-        // 2. Call SwaggerParser for 2.x or OpenAPIV3Parser for 3.0 and validate messages of parser
-        // 3. Validate JSON SCHEMA accordingly
-        // 4. Return answer valid(Image) if messages in parser and JsonSchemaValidator are null or 0
-        // 5. Return Invalid(Image) if messages in parser and JsonSchemaValidator are not null and > 0
-        // 6. Do the same fot debugByUrl and debugByContent but returning a Json with error messages instead of an image
-
         ValidationResponse validationResponse = null;
         try {
             validationResponse = debugByUrl(request, url);
