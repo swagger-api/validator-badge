@@ -1,0 +1,57 @@
+openapi: 3.0.0
+servers: []
+
+paths:
+  /users:
+    get:
+      responses:
+        '200':
+          description: hello world
+components:
+  schemas:
+    NewsArticle:
+      title: NewsArticle
+      type: object
+      nullable: true
+      properties:
+        id:
+          type: integer
+          format: int32
+          x-mysql-type: int(11)
+    allOfNewsArticle:
+      title: allOfNewsArticle
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/NewsArticle'
+        - properties:
+            articleBody:
+              type: string
+    anyOfNewsArticle:
+      title: anyOfNewsArticle
+      type: object
+      anyOf:
+        - $ref: '#/components/schemas/NewsArticle'
+        - properties:
+            articleBody:
+              type: string
+    oneOfNewsArticle:
+      title: oneOfNewsArticle
+      type: object
+      oneOf:
+        - $ref: '#/components/schemas/NewsArticle'
+        - properties:
+            articleBody:
+              type: string
+    notNewsArticle:
+      title: notNewsArticle
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/NewsArticle'
+        - not:
+            type: string
+  responses: {}
+  parameters: {}
+  examples: {}
+  requestBodies: {}
+  securitySchemes: {}
+  headers: {}

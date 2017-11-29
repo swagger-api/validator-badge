@@ -1,0 +1,166 @@
+---
+openapi: 3.0.0
+info:
+  title: Swagger Validator Badge
+  description: Validate a 2.x , 3.0.0 specification format
+  version: 1.0.0
+servers:
+- url: "/"
+paths:
+  "/validate":
+    get:
+      tags:
+      - Validator
+      summary: Validates a swagger definition
+      description: |
+        Validates the supplied payload to a 2.x or 3.0 specification
+        based on a `url` parameter
+      operationId: validateByUrl
+      parameters:
+      - name: url
+        in: query
+        description: A URL to the definition
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: successfully validated schema
+          content:
+            "image/png":
+              schema:
+                type: string
+                properties: {}
+            "application/yaml":
+              schema:
+                type: object
+                properties: {}
+        '400':
+          description: 'invaild input schema, or could not be validated'
+          content:
+            "*/*":
+              schema:
+                type: array
+                description: error messages
+                items:
+                  type: string
+    post:
+      tags:
+      - Validator
+      summary: Validate a 2.x or 3.0.0 definition
+      description: |
+        Validates the supplied payload of 2.x or 3.0 specification
+        based on an input specification
+      operationId: validateByContent
+      requestBody:
+        description: the specification to validate
+        content:
+          "application/json":
+            schema:
+              type: object
+              properties: {}
+          "application/yaml":
+            schema:
+              type: object
+              properties: {}
+        required: true
+      responses:
+        '200':
+          description: successfully validated schema
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties: {}
+            "application/yaml":
+              schema:
+                type: object
+                properties: {}
+        '400':
+          description: 'invaild input schema, or could not be validated'
+          content:
+            "*/*":
+              schema:
+                type: array
+                description: error messages
+                items:
+                  type: string
+  "/debug":
+      get:
+        tags:
+        - Validator
+        summary: Validates a swagger definition
+        description: |
+          Validates the supplied payload to a 2.x or 3.0 specification
+          based on a `url` parameter
+        operationId: reviewByUrl
+        parameters:
+        - name: url
+          in: query
+          description: A URL to the definition
+          required: true
+          schema:
+            type: string
+        responses:
+          '200':
+            description: successfully validated schema
+            content:
+              "application/json":
+                schema:
+                  type: object
+                  properties: {}
+              "application/yaml":
+                schema:
+                  type: object
+                  properties: {}
+          '400':
+            description: 'invaild input schema, or could not be validated'
+            content:
+              "*/*":
+                schema:
+                  type: array
+                  description: error messages
+                  items:
+                    type: string
+      post:
+        tags:
+        - Validator
+        summary: Validate a 2.x or 3.0.0 definition
+        description: |
+          Validates the supplied payload of 2.x or 3.0 specification
+          based on an input specification
+        operationId: reviewByContent
+        requestBody:
+          description: the specification to validate
+          content:
+            "application/json":
+              schema:
+                type: object
+                properties: {}
+            "application/yaml":
+              schema:
+                type: object
+                properties: {}
+          required: true
+        responses:
+          '200':
+            description: successfully validated schema
+            content:
+              "application/json":
+                schema:
+                  type: object
+                  properties: {}
+              "application/yaml":
+                schema:
+                  type: object
+                  properties: {}
+          '400':
+            description: 'invaild input schema, or could not be validated'
+            content:
+              "*/*":
+                schema:
+                  type: array
+                  description: error messages
+                  items:
+                    type: string
+components: {}

@@ -1,0 +1,9 @@
+controllerPackage: io.swagger.handler
+modelPackage:  io.swagger.model
+swaggerUrl: ./src/main/swagger/swagger.yaml
+
+entityProcessors:
+  - json
+  - yaml
+
+rootPath: /api
