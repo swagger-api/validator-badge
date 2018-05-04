@@ -12,6 +12,7 @@ import io.swagger.oas.inflector.models.RequestContext;
 import io.swagger.oas.inflector.models.ResponseContext;
 
 import io.swagger.parser.SwaggerParser;
+import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import io.swagger.parser.util.SwaggerDeserializationResult;
 import io.swagger.v3.parser.OpenAPIV3Parser;
@@ -551,7 +552,9 @@ public class ValidatorController{
 
     private SwaggerParseResult readOpenApi(String content) throws IllegalArgumentException {
         OpenAPIV3Parser parser = new OpenAPIV3Parser();
-        return parser.readContents(content, null, null);
+        ParseOptions options = new ParseOptions();
+        options.setResolveFully(true);
+        return parser.readContents(content, null, options);
 
     }
 

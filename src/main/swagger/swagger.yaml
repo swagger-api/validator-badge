@@ -29,21 +29,16 @@ paths:
           content:
             "image/png":
               schema:
-                type: string
-                properties: {}
-            "application/yaml":
+                $ref: '#/components/schemas/ImageModel'
+            "application/json":
               schema:
-                type: object
-                properties: {}
+                $ref: '#/components/schemas/ValidModel'
         '400':
-          description: 'invaild input schema, or could not be validated'
+          description: 'invalid input schema, or could not be validated'
           content:
-            "*/*":
+            "application/json":
               schema:
-                type: array
-                description: error messages
-                items:
-                  type: string
+                $ref: '#/components/schemas/ErrorModel'
     post:
       tags:
       - Validator
@@ -55,14 +50,15 @@ paths:
       requestBody:
         description: the specification to validate
         content:
+          "image/png":
+            schema:
+              $ref: '#/components/schemas/ImageModel'
           "application/json":
             schema:
-              type: object
-              properties: {}
+              $ref: '#/components/schemas/ValidModel'
           "application/yaml":
             schema:
-              type: object
-              properties: {}
+              $ref: '#/components/schemas/ValidModel'
         required: true
       responses:
         '200':
@@ -70,21 +66,13 @@ paths:
           content:
             "application/json":
               schema:
-                type: object
-                properties: {}
-            "application/yaml":
-              schema:
-                type: object
-                properties: {}
+                $ref: '#/components/schemas/ValidModel'
         '400':
-          description: 'invaild input schema, or could not be validated'
+          description: 'invalid input schema, or could not be validated'
           content:
-            "*/*":
+            "application/json":
               schema:
-                type: array
-                description: error messages
-                items:
-                  type: string
+                $ref: '#/components/schemas/ErrorModel'
   "/debug":
       get:
         tags:
@@ -107,21 +95,13 @@ paths:
             content:
               "application/json":
                 schema:
-                  type: object
-                  properties: {}
-              "application/yaml":
-                schema:
-                  type: object
-                  properties: {}
+                  $ref: '#/components/schemas/ValidModel'
           '400':
-            description: 'invaild input schema, or could not be validated'
+            description: 'invalid input schema, or could not be validated'
             content:
-              "*/*":
+              "application/json":
                 schema:
-                  type: array
-                  description: error messages
-                  items:
-                    type: string
+                  $ref: '#/components/schemas/ErrorModel'
       post:
         tags:
         - Validator
@@ -135,12 +115,7 @@ paths:
           content:
             "application/json":
               schema:
-                type: object
-                properties: {}
-            "application/yaml":
-              schema:
-                type: object
-                properties: {}
+                $ref: '#/components/schemas/ValidModel'
           required: true
         responses:
           '200':
@@ -148,19 +123,26 @@ paths:
             content:
               "application/json":
                 schema:
-                  type: object
-                  properties: {}
-              "application/yaml":
-                schema:
-                  type: object
-                  properties: {}
+                  $ref: '#/components/schemas/ValidModel'
           '400':
-            description: 'invaild input schema, or could not be validated'
+            description: 'invalid input schema, or could not be validated'
             content:
-              "*/*":
+              "application/json":
                 schema:
-                  type: array
-                  description: error messages
-                  items:
-                    type: string
-components: {}
+                  $ref: '#/components/schemas/ErrorModel'
+
+components:
+  schemas:
+    ErrorModel:
+      type: array
+      description: error messages
+      items:
+        type: string
+    ValidModel:
+      type: object
+      properties: {}
+    ImageModel:
+      type: string
+      format: binary
+      properties: {}
+
