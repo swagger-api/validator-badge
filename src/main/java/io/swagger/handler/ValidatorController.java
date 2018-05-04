@@ -337,7 +337,7 @@ public class ValidatorController{
         }
 
         // use the swagger deserializer to get human-friendly messages
-        if (specVersion.equals("3.0")){
+        if (specVersion.startsWith("3.0")){
             SwaggerParseResult result = readOpenApi(content);
             if(result != null) {
                 for(String message : result.getMessages()) {
@@ -412,7 +412,7 @@ public class ValidatorController{
 
 
         // use the swagger deserializer to get human-friendly messages
-        if (specVersion.equals("3.0")){
+        if (specVersion.startsWith("3.0")){
             SwaggerParseResult result = readOpenApi(content);
             if(result != null) {
                 for(String message : result.getMessages()) {
@@ -472,7 +472,7 @@ public class ValidatorController{
         } catch (Exception e) {
             LOGGER.warn("fetching schema from GitHub");
             InputStream is = null;
-            if (specVersion.equals("3.0")) {
+            if (specVersion.startsWith("3.0")) {
                 is = this.getClass().getClassLoader().getResourceAsStream(SCHEMA_FILE);
             }else if (specVersion.equals("2.0")) {
                 is = this.getClass().getClassLoader().getResourceAsStream(SCHEMA2_FILE);
