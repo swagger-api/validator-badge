@@ -25,20 +25,23 @@ paths:
           type: string
       responses:
         '200':
-          description: successfully validated schema
+          description: 'successfully validated schema'
           content:
             "image/png":
               schema:
                 $ref: '#/components/schemas/ImageModel'
             "application/json":
               schema:
-                $ref: '#/components/schemas/ValidModel'
+                $ref: '#/components/schemas/SimpleResponseModel'
         '400':
-          description: 'invalid input schema, or could not be validated'
+          description: 'invalid input schema'
           content:
+            "image/png":
+              schema:
+                $ref: '#/components/schemas/ImageModel'
             "application/json":
               schema:
-                $ref: '#/components/schemas/ErrorModel'
+                $ref: '#/components/schemas/SimpleResponseModel'
     post:
       tags:
       - Validator
@@ -52,10 +55,10 @@ paths:
         content:
           "application/json":
             schema:
-              $ref: '#/components/schemas/ValidModel'
+              $ref: '#/components/schemas/RequestModel'
           "application/yaml":
             schema:
-              $ref: '#/components/schemas/ValidModel'
+              $ref: '#/components/schemas/RequestModel'
         required: true
       responses:
         '200':
@@ -66,13 +69,13 @@ paths:
                 $ref: '#/components/schemas/ImageModel'
             "application/json":
               schema:
-                $ref: '#/components/schemas/ValidModel'
+                $ref: '#/components/schemas/SimpleResponseModel'
         '400':
           description: 'invalid input schema, or could not be validated'
           content:
             "application/json":
               schema:
-                $ref: '#/components/schemas/ErrorModel'
+                $ref: '#/components/schemas/SimpleResponseModel'
   "/debug":
       get:
         tags:
@@ -95,13 +98,13 @@ paths:
             content:
               "application/json":
                 schema:
-                  $ref: '#/components/schemas/ValidModel'
+                  $ref: '#/components/schemas/FullResponseModel'
           '400':
             description: 'invalid input schema, or could not be validated'
             content:
               "application/json":
                 schema:
-                  $ref: '#/components/schemas/ErrorModel'
+                  $ref: '#/components/schemas/FullResponseModel'
       post:
         tags:
         - Validator
@@ -115,7 +118,10 @@ paths:
           content:
             "application/json":
               schema:
-                $ref: '#/components/schemas/ValidModel'
+                $ref: '#/components/schemas/RequestModel'
+            "application/yaml":
+              schema:
+                $ref: '#/components/schemas/RequestModel'
           required: true
         responses:
           '200':
@@ -123,26 +129,41 @@ paths:
             content:
               "application/json":
                 schema:
-                  $ref: '#/components/schemas/ValidModel'
+                  $ref: '#/components/schemas/FullResponseModel'
           '400':
             description: 'invalid input schema, or could not be validated'
             content:
               "application/json":
                 schema:
-                  $ref: '#/components/schemas/ErrorModel'
+                  $ref: '#/components/schemas/FullResponseModel'
 
 components:
   schemas:
-    ErrorModel:
+    MessagesModel:
       type: array
-      description: error messages
+      description: Messages
       items:
         type: string
-    ValidModel:
+    SimpleResponseModel:
       type: object
-      properties: {}
-    ImageModel:
+      properties:
+        result:
+          type: string
+          description: the validation result
+          enum:
+            - valid
+            - invalid
+            - error
+            - upgrade
+    FullResponseModel:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        messages:
+          $ref: '#/components/schemas/MessagesModel'
+    ImageResponseModel:
       type: string
       format: binary
-      properties: {}
-
+    RequestModel:
+      type: object
