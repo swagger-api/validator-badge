@@ -38,7 +38,7 @@ paths:
           content:
             "image/png":
               schema:
-                $ref: '#/components/schemas/ImageModel'
+                $ref: '#/components/schemas/ImageResponseModel'
             "application/json":
               schema:
                 $ref: '#/components/schemas/SimpleResponseModel'
