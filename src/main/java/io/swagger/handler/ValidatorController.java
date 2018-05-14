@@ -113,6 +113,7 @@ public class ValidatorController{
 
 
         if (valid == true ){
+            //getMediaType() Validate MediaType to set response entity
             return new ResponseContext()
                     .contentType("image/png")
                     .entity(this.getClass().getClassLoader().getResourceAsStream("valid.png"));
