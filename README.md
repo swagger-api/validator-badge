@@ -1,4 +1,4 @@
-# Swagger Validator Badge
+# Swagger Validator Badge - DevOps
 
 You can validate any OpenAPI specification against the [OpenAPI 2.0 Schema] and [OpenAPI 3.0 Schema] as follows:
 
