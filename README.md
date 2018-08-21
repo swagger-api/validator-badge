@@ -1,4 +1,4 @@
-# Swagger Validator Badge
+# Swagger Validator Badge - DEVOPS
 
 [![Build Status](https://travis-ci.org/swagger-api/validator-badge.svg?branch=master)](https://travis-ci.org/swagger-api/validator-badge)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-validator/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-validator)
