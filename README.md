@@ -1,4 +1,4 @@
-# Swagger Validator Badge
+# Swagger Validator Badge <img src="https://raw.githubusercontent.com/swagger-api/swagger.io/wordpress/images/assets/SW-logo-clr.png" height="50" align="right">
 
 [![Build Status](https://img.shields.io/jenkins/s/https/jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-validator-badge-master.svg)](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-validator-badge-master)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-validator/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-validator)
@@ -48,7 +48,3 @@ or
 ```
 http://localhost:8002/?url=http://petstore.swagger.io/v2/swagger.json
 ```
-
----
-<img src="http://swagger.io/wp-content/uploads/2016/02/logo.jpg"/>
-
