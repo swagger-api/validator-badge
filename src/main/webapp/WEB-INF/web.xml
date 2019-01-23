@@ -17,7 +17,7 @@
     </servlet>
     <servlet-mapping>
         <servlet-name>swagger-inflector</servlet-name>
-        <url-pattern>/api/*</url-pattern>
+        <url-pattern>/validator/*</url-pattern>
     </servlet-mapping>
     <filter>
         <filter-name>CORSFilter</filter-name>

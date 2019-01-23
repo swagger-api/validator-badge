@@ -1,6 +1,4 @@
 {
-  "id": "",
-  "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
   "required": [
     "openapi",
@@ -34,7 +32,8 @@
       "type": "array",
       "items": {
         "$ref": "#/definitions/Tag"
-      }
+      },
+      "uniqueItems": true
     },
     "paths": {
       "$ref": "#/definitions/Paths"
@@ -54,10 +53,10 @@
       "required": [
         "$ref"
       ],
-      "properties": {
-        "$ref": {
+      "patternProperties": {
+        "^\\$ref$": {
           "type": "string",
-          "format": "uri"
+          "format": "uri-reference"
         }
       }
     },
@@ -76,7 +75,7 @@
         },
         "termsOfService": {
           "type": "string",
-          "format": "uri"
+          "format": "uri-reference"
         },
         "contact": {
           "$ref": "#/definitions/Contact"
@@ -102,7 +101,7 @@
         },
         "url": {
           "type": "string",
-          "format": "uri"
+          "format": "uri-reference"
         },
         "email": {
           "type": "string",
@@ -126,7 +125,7 @@
         },
         "url": {
           "type": "string",
-          "format": "uri"
+          "format": "uri-reference"
         }
       },
       "patternProperties": {
@@ -403,7 +402,7 @@
           "items": {
           },
           "minItems": 1,
-          "uniqueItems": true
+          "uniqueItems": false
         },
         "type": {
           "type": "string",
@@ -569,7 +568,7 @@
         },
         "namespace": {
           "type": "string",
-          "format": "url"
+          "format": "uri"
         },
         "prefix": {
           "type": "string"
@@ -599,6 +598,7 @@
           "type": "string"
         },
         "headers": {
+          "type": "object",
           "additionalProperties": {
             "oneOf": [
               {
@@ -729,7 +729,7 @@
         },
         "externalValue": {
           "type": "string",
-          "format": "uri"
+          "format": "uri-reference"
         }
       },
       "patternProperties": {
@@ -978,7 +978,8 @@
                 "$ref": "#/definitions/Reference"
               }
             ]
-          }
+          },
+          "uniqueItems": true
         }
       },
       "patternProperties": {
@@ -1022,7 +1023,8 @@
                 "$ref": "#/definitions/Reference"
               }
             ]
-          }
+          },
+          "uniqueItems": true
         },
         "requestBody": {
           "oneOf": [
@@ -1088,7 +1090,7 @@
         }
       },
       "patternProperties": {
-        "[1-5](?:\\d{2}|XX)": {
+        "^[1-5](?:\\d{2}|XX)$": {
           "oneOf": [
             {
               "$ref": "#/definitions/Response"
@@ -1102,15 +1104,7 @@
         }
       },
       "minProperties": 1,
-      "additionalProperties": false,
-      "not": {
-        "type": "object",
-        "patternProperties": {
-          "^x-": {
-          }
-        },
-        "additionalProperties": false
-      }
+      "additionalProperties": false
     },
     "SecurityRequirement": {
       "type": "object",
@@ -1154,7 +1148,7 @@
         },
         "url": {
           "type": "string",
-          "format": "uri"
+          "format": "uri-reference"
         }
       },
       "patternProperties": {
@@ -1995,17 +1989,6 @@
       ]
     },
     "NonBearerHTTPSecurityScheme": {
-      "not": {
-        "type": "object",
-        "properties": {
-          "scheme": {
-            "type": "string",
-            "enum": [
-              "bearer"
-            ]
-          }
-        }
-      },
       "type": "object",
       "required": [
         "scheme",
@@ -2013,7 +1996,12 @@
       ],
       "properties": {
         "scheme": {
-          "type": "string"
+          "type": "string",
+          "not": {
+            "enum": [
+              "bearer"
+            ]
+          }
         },
         "description": {
           "type": "string"
@@ -2104,7 +2092,7 @@
         },
         "openIdConnectUrl": {
           "type": "string",
-          "format": "url"
+          "format": "uri-reference"
         },
         "description": {
           "type": "string"
@@ -2147,11 +2135,11 @@
       "properties": {
         "authorizationUrl": {
           "type": "string",
-          "format": "uri"
+          "format": "uri-reference"
         },
         "refreshUrl": {
           "type": "string",
-          "format": "uri"
+          "format": "uri-reference"
         },
         "scopes": {
           "type": "object",
@@ -2174,11 +2162,11 @@
       "properties": {
         "tokenUrl": {
           "type": "string",
-          "format": "uri"
+          "format": "uri-reference"
         },
         "refreshUrl": {
           "type": "string",
-          "format": "uri"
+          "format": "uri-reference"
         },
         "scopes": {
           "type": "object",
@@ -2201,11 +2189,11 @@
       "properties": {
         "tokenUrl": {
           "type": "string",
-          "format": "uri"
+          "format": "uri-reference"
         },
         "refreshUrl": {
           "type": "string",
-          "format": "uri"
+          "format": "uri-reference"
         },
         "scopes": {
           "type": "object",
@@ -2229,15 +2217,15 @@
       "properties": {
         "authorizationUrl": {
           "type": "string",
-          "format": "uri"
+          "format": "uri-reference"
         },
         "tokenUrl": {
           "type": "string",
-          "format": "uri"
+          "format": "uri-reference"
         },
         "refreshUrl": {
           "type": "string",
-          "format": "uri"
+          "format": "uri-reference"
         },
         "scopes": {
           "type": "object",
@@ -2267,7 +2255,7 @@
       "properties": {
         "operationRef": {
           "type": "string",
-          "format": "uri"
+          "format": "uri-reference"
         },
         "parameters": {
           "type": "object",

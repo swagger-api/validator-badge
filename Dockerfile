@@ -1,13 +1,13 @@
 FROM openjdk:8-jre-alpine
 
-WORKDIR /oas-converter
+WORKDIR /validator
 
-COPY target/lib/jetty-runner.jar /oas-converter/jetty-runner.jar
-COPY target/*.war /oas-converter/server.war
-COPY src/main/swagger/swagger.yaml /oas-converter/
-COPY inflector.yaml /oas-converter/
+COPY target/lib/jetty-runner.jar /validator/jetty-runner.jar
+COPY target/*.war /validator/server.war
+COPY src/main/swagger/swagger.yaml /validator/
+COPY inflector.yaml /validator/
 
 EXPOSE 8080
 
-CMD ["java", "-jar", "-DswaggerUrl=swagger.yaml", "/oas-converter/jetty-runner.jar", "/oas-converter/server.war"]
+CMD ["java", "-jar", "-DswaggerUrl=swagger.yaml", "/validator/jetty-runner.jar", "/validator/server.war"]
 

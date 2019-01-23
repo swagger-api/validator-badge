@@ -8,9 +8,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import io.swagger.handler.ValidatorController;
+import io.swagger.models.ValidationResponse;
 import io.swagger.oas.inflector.models.RequestContext;
 import io.swagger.oas.inflector.models.ResponseContext;
 
+import io.swagger.v3.core.util.Yaml;
 import org.apache.commons.io.FileUtils;
 
 import org.testng.Assert;
@@ -237,7 +239,6 @@ public class ValidatorTest {
         InputStream entity = (InputStream)response.getEntity();
         InputStream valid = this.getClass().getClassLoader().getResourceAsStream(VALID_IMAGE);
 
-
         Assert.assertTrue( validateEquals(entity,valid) == true);
     }
 
@@ -248,16 +249,14 @@ public class ValidatorTest {
         String url = "http://localhost:${dynamicPort}/valid/yaml";
         url = url.replace("${dynamicPort}", String.valueOf(this.serverPort));
 
-
         ValidatorController validator = new ValidatorController();
         ResponseContext response = validator.reviewByUrl(new RequestContext(), url);
 
         Assert.assertEquals(APPLICATION, response.getContentType().getType());
         Assert.assertEquals(JSON, response.getContentType().getSubtype());
-        List messages = (ArrayList) response.getEntity();
-        Assert.assertTrue(messages.size() ==  0);
-
-
+        ValidationResponse validationResponse = (ValidationResponse) response.getEntity();
+        Assert.assertTrue(validationResponse.getMessages() == null || validationResponse.getMessages().size() == 0);
+        Assert.assertTrue(validationResponse.getSchemaValidationMessages() == null || validationResponse.getSchemaValidationMessages().size() == 0);
     }
 
     @Test
@@ -271,10 +270,9 @@ public class ValidatorTest {
 
         Assert.assertEquals(APPLICATION, response.getContentType().getType());
         Assert.assertEquals(JSON, response.getContentType().getSubtype());
-        List messages = (ArrayList) response.getEntity();
-        Assert.assertTrue(messages.size() ==  0);
-
-
+        ValidationResponse validationResponse = (ValidationResponse) response.getEntity();
+        Assert.assertTrue(validationResponse.getMessages() == null || validationResponse.getMessages().size() == 0);
+        Assert.assertTrue(validationResponse.getSchemaValidationMessages() == null || validationResponse.getSchemaValidationMessages().size() == 0);
     }
 
     @Test
@@ -287,9 +285,9 @@ public class ValidatorTest {
 
         Assert.assertEquals(APPLICATION, response.getContentType().getType());
         Assert.assertEquals(JSON, response.getContentType().getSubtype());
-        List messages = (ArrayList) response.getEntity();
-        Assert.assertTrue(messages.get(0).equals(INFO_MISSING));
-        Assert.assertTrue(messages.get(1).equals(INFO_MISSING_SCHEMA));
+        ValidationResponse validationResponse = (ValidationResponse) response.getEntity();
+        Assert.assertTrue(validationResponse.getMessages().contains(INFO_MISSING));
+        Assert.assertTrue(validationResponse.getSchemaValidationMessages().get(0).getMessage().equals(INFO_MISSING_SCHEMA));
 
     }
 
@@ -303,9 +301,9 @@ public class ValidatorTest {
 
         Assert.assertEquals(APPLICATION, response.getContentType().getType());
         Assert.assertEquals(JSON, response.getContentType().getSubtype());
-        List messages = (ArrayList) response.getEntity();
-        Assert.assertTrue(messages.get(0).equals(INFO_MISSING));
-        Assert.assertTrue(messages.get(1).equals(INFO_MISSING_SCHEMA));
+        ValidationResponse validationResponse = (ValidationResponse) response.getEntity();
+        Assert.assertTrue(validationResponse.getMessages().contains(INFO_MISSING));
+        Assert.assertTrue(validationResponse.getSchemaValidationMessages().get(0).getMessage().equals(INFO_MISSING_SCHEMA));
 
     }
 
@@ -318,11 +316,9 @@ public class ValidatorTest {
 
         Assert.assertEquals(APPLICATION, response.getContentType().getType());
         Assert.assertEquals(JSON, response.getContentType().getSubtype());
-        List messages = (ArrayList) response.getEntity();
-        Assert.assertTrue(messages.get(0).equals(INFO_MISSING));
-        Assert.assertTrue(messages.get(1).equals(INFO_MISSING_SCHEMA));
-
-
+        ValidationResponse validationResponse = (ValidationResponse) response.getEntity();
+        Assert.assertTrue(validationResponse.getMessages().contains(INFO_MISSING));
+        Assert.assertTrue(validationResponse.getSchemaValidationMessages().get(0).getMessage().equals(INFO_MISSING_SCHEMA));
     }
 
     @Test
@@ -334,11 +330,9 @@ public class ValidatorTest {
 
         Assert.assertEquals(APPLICATION, response.getContentType().getType());
         Assert.assertEquals(JSON, response.getContentType().getSubtype());
-        List messages = (ArrayList) response.getEntity();
-        Assert.assertTrue(messages.get(0).equals(INFO_MISSING));
-        Assert.assertTrue(messages.get(1).equals(INFO_MISSING_SCHEMA));
-
-
+        ValidationResponse validationResponse = (ValidationResponse) response.getEntity();
+        Assert.assertTrue(validationResponse.getMessages().contains(INFO_MISSING));
+        Assert.assertTrue(validationResponse.getSchemaValidationMessages().get(0).getMessage().equals(INFO_MISSING_SCHEMA));
     }
 
     @Test
@@ -350,9 +344,9 @@ public class ValidatorTest {
 
         Assert.assertEquals(APPLICATION, response.getContentType().getType());
         Assert.assertEquals(JSON, response.getContentType().getSubtype());
-        List messages = (ArrayList) response.getEntity();
-        Assert.assertTrue(messages.size() ==  0);
-
+        ValidationResponse validationResponse = (ValidationResponse) response.getEntity();
+        Assert.assertTrue(validationResponse.getMessages() == null || validationResponse.getMessages().size() == 0);
+        Assert.assertTrue(validationResponse.getSchemaValidationMessages() == null || validationResponse.getSchemaValidationMessages().size() == 0);
     }
 
     @Test
@@ -364,9 +358,9 @@ public class ValidatorTest {
 
         Assert.assertEquals(APPLICATION, response.getContentType().getType());
         Assert.assertEquals(JSON, response.getContentType().getSubtype());
-        List messages = (ArrayList) response.getEntity();
-        Assert.assertTrue(messages.size() ==  0);
-
+        ValidationResponse validationResponse = (ValidationResponse) response.getEntity();
+        Assert.assertTrue(validationResponse.getMessages() == null || validationResponse.getMessages().size() == 0);
+        Assert.assertTrue(validationResponse.getSchemaValidationMessages() == null || validationResponse.getSchemaValidationMessages().size() == 0);
     }
 
 

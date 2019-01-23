@@ -108,7 +108,7 @@ paths:
           items:
             type: string
           collectionFormat: multi
-          default: available
+          default: [available]
           enum:
             - available
             - pending
