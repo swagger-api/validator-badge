@@ -3,7 +3,7 @@ openapi: 3.0.0
 info:
   title: Swagger Validator Badge
   description: Validate a 2.x , 3.0.0 specification format
-  version: 2.0.0-SNAPSHOT
+  version: 2.0.0
 servers:
 - url: "/"
 paths:
