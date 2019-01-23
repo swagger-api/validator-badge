@@ -5,11 +5,11 @@
         <version>5</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <groupId>io.swagger</groupId>
-    <artifactId>spec-validator</artifactId>
+    <groupId>io.swagger.validator.v3</groupId>
+    <artifactId>swagger-validator</artifactId>
     <packaging>war</packaging>
-    <name>spec-validator</name>
-    <version>1.0.0</version>
+    <name>swagger-validator</name>
+    <version>2.0.0-SNAPSHOT</version>
     <prerequisites>
         <maven>2.2.0</maven>
     </prerequisites>
@@ -122,6 +122,7 @@
                     <webApp>
                         <contextPath>/</contextPath>
                     </webApp>
+                    <webAppSourceDirectory>target/${project.artifactId}-${project.version}</webAppSourceDirectory>
                     <httpConnector>
                         <port>8080</port>
                         <idleTimeout>60000</idleTimeout>
@@ -147,7 +148,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.jaxrs</groupId>
             <artifactId>jackson-jaxrs-yaml-provider</artifactId>
-            <version>2.9.5</version>
+            <version>${jackson.version}</version>
         </dependency>
 
         <dependency>
@@ -195,11 +196,11 @@
     <properties>
 
         <testng-version>6.9.6</testng-version>
-        <jackson.version>2.9.5</jackson.version>
+        <jackson.version>2.9.8</jackson.version>
         <httpclient-version>4.5.1</httpclient-version>
         <maven-plugin-version>1.0.0</maven-plugin-version>
-        <swagger-parser-version>2.0.0-SNAPSHOT</swagger-parser-version>
-        <swagger-inflector-version>2.0.0-SNAPSHOT</swagger-inflector-version>
+        <swagger-parser-version>2.0.8</swagger-parser-version>
+        <swagger-inflector-version>2.0.0-rc3</swagger-inflector-version>
         <jetty-version>9.4.9.v20180320</jetty-version>
         <logback-version>1.0.1</logback-version>
         <slf4j-version>1.6.3</slf4j-version>

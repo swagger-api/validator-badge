@@ -3,18 +3,18 @@ openapi: 3.0.0
 info:
   title: Swagger Validator Badge
   description: Validate a 2.x , 3.0.0 specification format
-  version: 1.0.0
+  version: 2.0.0-SNAPSHOT
 servers:
 - url: "/"
 paths:
-  "/validate":
+  "/":
     get:
       tags:
       - Validator
-      summary: Validates a swagger definition
+      summary: Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.0 definition returning a valid/invalid badge
       description: |
-        Validates the supplied payload to a 2.x or 3.0 specification
-        based on a `url` parameter
+        Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.0 definition provided via `url` parameter
+        returning a valid/invalid badge
       operationId: validateByUrl
       parameters:
       - name: url
@@ -25,32 +25,19 @@ paths:
           type: string
       responses:
         '200':
-          description: successfully validated schema
+          description: result of validation as valid/invalid badge
           content:
             "image/png":
               schema:
                 type: string
-                properties: {}
-            "application/yaml":
-              schema:
-                type: object
-                properties: {}
-        '400':
-          description: 'invaild input schema, or could not be validated'
-          content:
-            "*/*":
-              schema:
-                type: array
-                description: error messages
-                items:
-                  type: string
+                format: binary
     post:
       tags:
       - Validator
-      summary: Validate a 2.x or 3.0.0 definition
+      summary: Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.0 definition returning a valid/invalid badge
       description: |
-        Validates the supplied payload of 2.x or 3.0 specification
-        based on an input specification
+        Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.0 definition provided in request body
+        returning a valid/invalid badge
       operationId: validateByContent
       requestBody:
         description: the specification to validate
@@ -58,109 +45,117 @@ paths:
           "application/json":
             schema:
               type: object
-              properties: {}
           "application/yaml":
             schema:
               type: object
-              properties: {}
         required: true
       responses:
         '200':
-          description: successfully validated schema
+          description: result of validation as valid/invalid badge
           content:
-            "application/json":
+            "image/png":
               schema:
-                type: object
-                properties: {}
-            "application/yaml":
-              schema:
-                type: object
-                properties: {}
-        '400':
-          description: 'invaild input schema, or could not be validated'
-          content:
-            "*/*":
-              schema:
-                type: array
-                description: error messages
-                items:
-                  type: string
+                type: string
+                format: binary
   "/debug":
-      get:
-        tags:
-        - Validator
-        summary: Validates a swagger definition
-        description: |
-          Validates the supplied payload to a 2.x or 3.0 specification
-          based on a `url` parameter
-        operationId: reviewByUrl
-        parameters:
-        - name: url
-          in: query
-          description: A URL to the definition
-          required: true
-          schema:
-            type: string
-        responses:
-          '200':
-            description: successfully validated schema
-            content:
-              "application/json":
-                schema:
-                  type: object
-                  properties: {}
-              "application/yaml":
-                schema:
-                  type: object
-                  properties: {}
-          '400':
-            description: 'invaild input schema, or could not be validated'
-            content:
-              "*/*":
-                schema:
-                  type: array
-                  description: error messages
-                  items:
-                    type: string
-      post:
-        tags:
-        - Validator
-        summary: Validate a 2.x or 3.0.0 definition
-        description: |
-          Validates the supplied payload of 2.x or 3.0 specification
-          based on an input specification
-        operationId: reviewByContent
-        requestBody:
-          description: the specification to validate
+    get:
+      tags:
+      - Validator
+      summary: Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.0 definition returning a validation response
+      description: |
+        Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.0 definition provided via `url` parameter
+        returning a validation response containing any found validation errors
+      operationId: reviewByUrl
+      parameters:
+      - name: url
+        in: query
+        description: A URL to the definition
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: result of validation as a validation response
           content:
             "application/json":
               schema:
-                type: object
-                properties: {}
+                $ref: '#/components/schemas/ValidationResponse'
             "application/yaml":
               schema:
-                type: object
-                properties: {}
-          required: true
-        responses:
-          '200':
-            description: successfully validated schema
-            content:
-              "application/json":
-                schema:
-                  type: object
-                  properties: {}
-              "application/yaml":
-                schema:
-                  type: object
-                  properties: {}
-          '400':
-            description: 'invaild input schema, or could not be validated'
-            content:
-              "*/*":
-                schema:
-                  type: array
-                  description: error messages
-                  items:
-                    type: string
-components: {}
+                $ref: '#/components/schemas/ValidationResponse'
+    post:
+      tags:
+      - Validator
+      summary: Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.0 definition returning a validation response
+      description: |
+        Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.0 definition provided via request body
+        returning a validation response containing any found validation errors
+      operationId: reviewByContent
+      requestBody:
+        description: the specification to validate
+        content:
+          "application/json":
+            schema:
+              type: object
+          "application/yaml":
+            schema:
+              type: object
+        required: true
+      responses:
+        '200':
+          description: result of validation as a validation response
+          content:
+            "application/json":
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+            "application/yaml":
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+components:
+  schemas:
+    Instance:
+      type: object
+      properties:
+        pointer:
+          type: string
+    Schema:
+      type: object
+      properties:
+        loadingURI:
+          type: string
+        pointer:
+          type: string
+    SchemaValidationError:
+      type: object
+      properties:
+        level:
+          type: string
+        domain:
+          type: string
+        keyword:
+          type: string
+        message:
+          type: string
+        schema:
+          $ref: '#/components/schemas/Schema'
+        instance:
+          $ref: '#/components/schemas/Instance'
+        required:
+          type: array
+          items:
+            type: string
+        missing:
+          type: array
+          items:
+            type: string
+    ValidationResponse:
+      type: object
+      properties:
+        messages:
+          type: array
+          items:
+            type: string
+        schemaValidationMessages:
+          type: array
+          items:
+            $ref: '#/components/schemas/SchemaValidationError'

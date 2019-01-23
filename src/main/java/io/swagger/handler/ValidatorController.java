@@ -49,23 +49,40 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.List;
-
+import java.util.stream.Collectors;
 
 public class ValidatorController{
-    static final String INVALID_VERSION = "Deprecated Swagger version.  Please visit http://swagger.io for information on upgrading to Swagger 2.0\"";
+
+    /*
+        NOTE: as of Jan 2019, source of truth URL for OpenAPI 3.0 JSON schema is not yet stable,
+        therefore the latest schema from the following commit in oas-schema branch has been copied locally
+        and is used for validation.
+
+        https://github.com/OAI/OpenAPI-Specification/blob/0684d656a7de8ec1e727e31fa268b7213351e090/schemas/v3.0/schema.yaml
+
+        TODO: once the source of truth gets finalized, the schema can be dynamically downloaded and cached, as done for v2
+
+        The following locations hold currently a (different) copy of v3 schema:
+
+        - https://github.com/OAI/OpenAPI-Specification/blob/oas3-schema/schemas/v3.0/schema.yaml (open PR #1270)
+        - http://23.22.16.221/v3/schema.json (comes from https://github.com/swagger-api/swagger-schema)
+     */
     static final String SCHEMA_FILE = "schema3.json";
-    static final String SCHEMA_URL = "https://raw.githubusercontent.com/swagger-api/validator-badge/validator-rc2/src/main/resources/schema3.json";
+    /* SCHEMA_URL not in use, see note above
+    static final String SCHEMA_URL = "https://github.com/OAI/OpenAPI-Specification/blob/0684d656a7de8ec1e727e31fa268b7213351e090/schemas/v3.0/schema.yaml";
+    */
+
     static final String SCHEMA2_FILE = "schema.json";
     static final String SCHEMA2_URL = "http://swagger.io/v2/schema.json";
 
+    static final String INVALID_VERSION = "Deprecated Swagger version.  Please visit http://swagger.io for information on upgrading to Swagger/OpenAPI 2.0 or OpenAPI 3.0";
+
     static Logger LOGGER = LoggerFactory.getLogger(ValidatorController.class);
     static long LAST_FETCH = 0;
-    static String CACHED_SCHEMA = null;
     static ObjectMapper JsonMapper = Json.mapper();
     static ObjectMapper YamlMapper = Yaml.mapper();
-    private JsonSchema schema;
-    static String specVersion = "";
-
+    private JsonSchema schemaV2;
+    private JsonSchema schemaV3;
 
     public ResponseContext validateByUrl(RequestContext request , String url) {
 
@@ -82,87 +99,7 @@ public class ValidatorController{
             return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process URL" );
         }
 
-        if (validationResponse == null){
-            return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process URL" );
-        }
-
-        boolean valid = true;
-        List messages = new ArrayList<>();
-
-        if (validationResponse.getMessages() != null) {
-            for (String message : validationResponse.getMessages()) {
-                if (message != null) {
-                    messages.add(message);
-                    if(message.endsWith("is unsupported")) {
-                        valid = true;
-                    }else{
-                        valid = false;
-                    }
-                }
-            }
-        }
-        if (validationResponse.getSchemaValidationMessages() != null) {
-            for (SchemaValidationError error : validationResponse.getSchemaValidationMessages()) {
-                if (error != null) {
-                    messages.add(error.getMessage());
-                    valid= false;
-                }
-            }
-        }
-
-
-        if (valid == true ){
-            return new ResponseContext()
-                    .contentType("image/png")
-                    .entity(this.getClass().getClassLoader().getResourceAsStream("valid.png"));
-        }else{
-            return new ResponseContext()
-                    .contentType("image/png")
-                    .entity(this.getClass().getClassLoader().getResourceAsStream("invalid.png"));
-        }
-
-    }
-
-    public ResponseContext reviewByUrl(RequestContext request , String url) {
-
-        if(url == null) {
-            return new ResponseContext()
-                    .status(Response.Status.BAD_REQUEST)
-                    .entity( "No specification supplied in either the url or request body.  Try again?" );
-        }
-
-        ValidationResponse validationResponse = null;
-        try {
-            validationResponse = debugByUrl(request, url);
-        }catch (Exception e){
-            return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process URL" );
-        }
-
-        if (validationResponse == null){
-            return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process URL" );
-        }
-
-
-        List messages = new ArrayList<>();
-
-        if (validationResponse.getMessages() != null) {
-            for (String message : validationResponse.getMessages()) {
-                if (message != null) {
-                    messages.add(message);
-                }
-            }
-        }
-        if (validationResponse.getSchemaValidationMessages() != null) {
-            for (SchemaValidationError error : validationResponse.getSchemaValidationMessages()) {
-                if (error != null) {
-                    messages.add(error.getMessage());
-                }
-            }
-        }
-
-        return new ResponseContext()
-                .contentType("application/json")
-                .entity(messages);
+        return processValidationResponse(validationResponse);
     }
 
     public ResponseContext validateByContent(RequestContext request, JsonNode inputSpec) {
@@ -180,12 +117,17 @@ public class ValidatorController{
             return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process URL" );
         }
 
+        return processValidationResponse(validationResponse);
+    }
+
+
+    private ResponseContext processValidationResponse(ValidationResponse validationResponse) {
         if (validationResponse == null){
-            return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process URL" );
+            return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process specification" );
         }
 
-
         boolean valid = true;
+        boolean upgrade = false;
         List messages = new ArrayList<>();
 
         if (validationResponse.getMessages() != null) {
@@ -204,22 +146,52 @@ public class ValidatorController{
             for (SchemaValidationError error : validationResponse.getSchemaValidationMessages()) {
                 if (error != null) {
                     messages.add(error.getMessage());
-                    valid= false;
+                    if (error.getLevel() != null && error.getLevel().toLowerCase().contains("error")) {
+                        valid= false;
+                    }
+                    if (INVALID_VERSION.equals(error.getMessage())) {
+                        upgrade = true;
+                    }
                 }
             }
         }
 
-
-        if (valid == true ){
+        if (upgrade == true ){
+            return new ResponseContext()
+                    .contentType("image/png")
+                    .entity(this.getClass().getClassLoader().getResourceAsStream("upgrade.png"));
+        }else if (valid == true ){
             return new ResponseContext()
                     .contentType("image/png")
                     .entity(this.getClass().getClassLoader().getResourceAsStream("valid.png"));
-        }else{
+        } else{
             return new ResponseContext()
                     .contentType("image/png")
                     .entity(this.getClass().getClassLoader().getResourceAsStream("invalid.png"));
         }
     }
+    public ResponseContext reviewByUrl(RequestContext request , String url) {
+
+        if(url == null) {
+            return new ResponseContext()
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity( "No specification supplied in either the url or request body.  Try again?" );
+        }
+
+        ValidationResponse validationResponse = null;
+        try {
+            validationResponse = debugByUrl(request, url);
+        }catch (Exception e){
+            return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process specification" );
+        }
+
+        return new ResponseContext()
+                .contentType("application/json")
+                .entity(validationResponse);
+        //return processDebugValidationResponse(validationResponse);
+
+    }
+
 
     public ResponseContext reviewByContent(RequestContext request, JsonNode inputSpec) {
         if(inputSpec == null) {
@@ -233,11 +205,18 @@ public class ValidatorController{
         try {
             validationResponse = debugByContent(request ,inputAsString);
         }catch (Exception e){
-            return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process URL" );
+            return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process specification" );
         }
 
+        return new ResponseContext()
+                .contentType("application/json")
+                .entity(validationResponse);
+        //return processDebugValidationResponse(validationResponse);
+    }
+
+    private ResponseContext processDebugValidationResponse(ValidationResponse validationResponse) {
         if (validationResponse == null){
-            return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process URL" );
+            return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process specification" );
         }
 
         List messages = new ArrayList<>();
@@ -264,33 +243,6 @@ public class ValidatorController{
 
 
     }
-
-
-
-
-    private String getVersion(JsonNode node) {
-        if (node == null) {
-            return null;
-        }
-        JsonNode version = node.get("swagger");
-        if (version != null) {
-            specVersion = "2.0";
-            return version.toString();
-        }
-        version = node.get("swaggerVersion");
-        if (version != null) {
-            specVersion = "2.0";
-            return version.toString();
-        }
-        version = node.get("openapi");
-        if (version != null) {
-            specVersion = "3.0";
-            return version.toString();
-        }
-        LOGGER.debug("version not found!");
-        return null;
-    }
-
     public ValidationResponse debugByUrl( RequestContext request, String url) throws Exception {
         ValidationResponse output = new ValidationResponse();
         String content;
@@ -314,6 +266,13 @@ public class ValidatorController{
             return output;
         }
 
+        return debugByContent(request, content);
+    }
+
+    public ValidationResponse debugByContent(RequestContext request, String content) throws Exception {
+
+        ValidationResponse output = new ValidationResponse();
+
         // convert to a JsonNode
 
         JsonNode spec = readNode(content);
@@ -325,26 +284,48 @@ public class ValidatorController{
             return output;
         }
 
+        boolean isVersion2 = false;
+
         // get the version, return deprecated if version 1.x
         String version = getVersion(spec);
-        if (version != null && version.startsWith("\"1.")) {
+        if (version != null && (version.startsWith("\"1") || version.startsWith("1"))) {
             ProcessingMessage pm = new ProcessingMessage();
             pm.setLogLevel(LogLevel.ERROR);
             pm.setMessage(INVALID_VERSION);
             output.addValidationMessage(new SchemaValidationError(pm.asJson()));
             return output;
-        }
+        } else if (version != null && (version.startsWith("\"2") || version.startsWith("2"))) {
+            isVersion2 = true;
+            SwaggerDeserializationResult result = null;
+            try {
+                result = readSwagger(content);
+            } catch (Exception e) {
+                LOGGER.debug("can't read Swagger contents", e);
 
-        // use the swagger deserializer to get human-friendly messages
-        if (specVersion.equals("3.0")){
-            SwaggerParseResult result = readOpenApi(content);
-            if(result != null) {
-                for(String message : result.getMessages()) {
+                ProcessingMessage pm = new ProcessingMessage();
+                pm.setLogLevel(LogLevel.ERROR);
+                pm.setMessage("unable to parse Swagger: " + e.getMessage());
+                output.addValidationMessage(new SchemaValidationError(pm.asJson()));
+                return output;
+            }
+            if (result != null) {
+                for (String message : result.getMessages()) {
                     output.addMessage(message);
                 }
             }
-        }else if (specVersion.equals("2.0")) {
-           SwaggerDeserializationResult result = readSwagger(content);
+        } else if (version == null || (version.startsWith("\"3") || version.startsWith("3"))) {
+            SwaggerParseResult result = null;
+            try {
+                result = readOpenApi(content);
+            } catch (Exception e) {
+                LOGGER.debug("can't read OpenAPI contents", e);
+
+                ProcessingMessage pm = new ProcessingMessage();
+                pm.setLogLevel(LogLevel.ERROR);
+                pm.setMessage("unable to parse OpenAPI: " + e.getMessage());
+                output.addValidationMessage(new SchemaValidationError(pm.asJson()));
+                return output;
+            }
             if (result != null) {
                 for (String message : result.getMessages()) {
                     output.addMessage(message);
@@ -352,146 +333,63 @@ public class ValidatorController{
             }
         }
         // do actual JSON schema validation
-        JsonNode schemaObject = JsonMapper.readTree(getSchema());
-        JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
-        JsonSchema schema = factory.getJsonSchema(schemaObject);
+        JsonSchema schema = getSchema(isVersion2);
         ProcessingReport report = schema.validate(spec);
         ListProcessingReport lp = new ListProcessingReport();
         lp.mergeWith(report);
-
-        if (report.isSuccess()) {
-            try {
-                //readSwagger(content);
-            } catch (IllegalArgumentException e) {
-                LOGGER.debug("can't read swagger contents", e);
-
-                ProcessingMessage pm = new ProcessingMessage();
-                pm.setLogLevel(LogLevel.ERROR);
-                pm.setMessage("unable to parse swagger from " + url);
-                output.addValidationMessage(new SchemaValidationError(pm.asJson()));
-                return output;
-            }
-        }
 
         java.util.Iterator<ProcessingMessage> it = lp.iterator();
         while (it.hasNext()) {
             ProcessingMessage pm = it.next();
             output.addValidationMessage(new SchemaValidationError(pm.asJson()));
         }
-        return output;
-    }
 
-    public ValidationResponse debugByContent(RequestContext request, String content) throws Exception {
-
-        ValidationResponse output = new ValidationResponse();
-
-        JsonNode spec = readNode(content);
-
-        if (spec == null) {
-            ProcessingMessage pm = new ProcessingMessage();
-            pm.setLogLevel(LogLevel.ERROR);
-            pm.setMessage("Unable to read content.  It may be invalid JSON or YAML");
-            output.addValidationMessage(new SchemaValidationError(pm.asJson()));
-            return output;
-        }
-
-        String version = getVersion(spec);
-        if (version != null && version.startsWith("\"1.")) {
-            ProcessingMessage pm = new ProcessingMessage();
-            pm.setLogLevel(LogLevel.ERROR);
-            pm.setMessage(INVALID_VERSION);
-            output.addValidationMessage(new SchemaValidationError(pm.asJson()));
-            return output;
-        }
-
-        JsonNode schemaObject = JsonMapper.readTree(getSchema());
-        JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
-        JsonSchema schema = factory.getJsonSchema(schemaObject);
-
-
-
-        // use the swagger deserializer to get human-friendly messages
-        if (specVersion.equals("3.0")){
-            SwaggerParseResult result = readOpenApi(content);
-            if(result != null) {
-                for(String message : result.getMessages()) {
-                    output.addMessage(message);
-                }
-            }
-        }else if (specVersion.equals("2.0")) {
-            SwaggerDeserializationResult result = readSwagger(content);
-            if (result != null) {
-                for (String message : result.getMessages()) {
-                    output.addMessage(message);
-                }
-            }
-        }
-
-        // do actual JSON schema validation
-        ProcessingReport report = schema.validate(spec);
-        ListProcessingReport lp = new ListProcessingReport();
-        lp.mergeWith(report);
-
-        if (report.isSuccess()) {
-            try {
-                //readSwagger(content);
-            } catch (IllegalArgumentException e) {
-                LOGGER.debug("can't read swagger contents", e);
-
-                ProcessingMessage pm = new ProcessingMessage();
-                pm.setLogLevel(LogLevel.ERROR);
-                pm.setMessage("unable to parse swagger from contents");
-                output.addValidationMessage(new SchemaValidationError(pm.asJson()));
-                return output;
-            }
-        }
-
-        java.util.Iterator<ProcessingMessage> it = lp.iterator();
-        while (it.hasNext()) {
-            ProcessingMessage pm = it.next();
-            output.addValidationMessage(new SchemaValidationError(pm.asJson()));
-        }
         return output;
     }
 
 
-    private String getSchema() throws Exception {
-        /*if (CACHED_SCHEMA != null && (System.currentTimeMillis() - LAST_FETCH) < 600000) {
-            return CACHED_SCHEMA;
-        }*/
+    private JsonSchema getSchema(boolean isVersion2) throws Exception {
+        if (isVersion2) {
+            return getSchemaV2();
+        } else {
+            return getSchemaV3();
+        }
+    }
+
+    // TODO see note above about V3 online version
+    private JsonSchema getSchemaV3() throws Exception {
+        if (schemaV3 == null) {
+            schemaV3 = resolveJsonSchema(getResourceFileAsString(SCHEMA_FILE));
+        }
+        return schemaV3;
+
+    }
+    private JsonSchema getSchemaV2() throws Exception {
+        if (schemaV2 != null && (System.currentTimeMillis() - LAST_FETCH) < 600000) {
+            return schemaV2;
+        }
+
         try {
-            LOGGER.debug("returning cached schema");
+            LOGGER.debug("returning online schema");
             LAST_FETCH = System.currentTimeMillis();
-            if (specVersion.equals("3.0")) {
-                CACHED_SCHEMA = getUrlContents(SCHEMA_URL);
-            }else if (specVersion.equals("2.0")) {
-                CACHED_SCHEMA = getUrlContents(SCHEMA2_URL);
-            }
-            return CACHED_SCHEMA;
+            schemaV2 = resolveJsonSchema(getUrlContents(SCHEMA2_URL));
+            return schemaV2;
         } catch (Exception e) {
-            LOGGER.warn("fetching schema from GitHub");
-            InputStream is = null;
-            if (specVersion.equals("3.0")) {
-                is = this.getClass().getClassLoader().getResourceAsStream(SCHEMA_FILE);
-            }else if (specVersion.equals("2.0")) {
-                is = this.getClass().getClassLoader().getResourceAsStream(SCHEMA2_FILE);
-            }
-
-            BufferedReader in = new BufferedReader(
-                    new InputStreamReader(is));
-
-            String inputLine;
-            StringBuilder contents = new StringBuilder();
-            while ((inputLine = in.readLine()) != null) {
-                contents.append(inputLine);
-            }
-            in.close();
+            LOGGER.warn("error fetching schema from GitHub, using local copy");
+            schemaV2 = resolveJsonSchema(getResourceFileAsString(SCHEMA2_FILE));
             LAST_FETCH = System.currentTimeMillis();
-            CACHED_SCHEMA = contents.toString();
-            return CACHED_SCHEMA;
+            return schemaV2;
         }
+
+
     }
 
+    private JsonSchema resolveJsonSchema(String schemaAsString) throws Exception {
+        JsonNode schemaObject = JsonMapper.readTree(schemaAsString);
+        JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
+        return factory.getJsonSchema(schemaObject);
+
+    }
     private CloseableHttpClient getCarelessHttpClient() {
         CloseableHttpClient httpClient = null;
 
@@ -571,4 +469,38 @@ public class ValidatorController{
             return null;
         }
     }
+
+
+    private String getVersion(JsonNode node) {
+        if (node == null) {
+            return null;
+        }
+
+        JsonNode version = node.get("openapi");
+        if (version != null) {
+            return version.toString();
+        }
+
+        version = node.get("swagger");
+        if (version != null) {
+            return version.toString();
+        }
+        version = node.get("swaggerVersion");
+        if (version != null) {
+            return version.toString();
+        }
+
+        LOGGER.debug("version not found!");
+        return null;
+    }
+
+    public String getResourceFileAsString(String fileName) {
+        InputStream is = this.getClass().getClassLoader().getResourceAsStream(fileName);
+        if (is != null) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            return reader.lines().collect(Collectors.joining(System.lineSeparator()));
+        }
+        return null;
+    }
+
 }
