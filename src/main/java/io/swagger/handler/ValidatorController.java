@@ -2,6 +2,7 @@ package io.swagger.handler;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.github.fge.jsonschema.core.report.ListProcessingReport;
 import com.github.fge.jsonschema.core.report.LogLevel;
 import com.github.fge.jsonschema.core.report.ProcessingMessage;
@@ -53,24 +54,8 @@ import java.util.stream.Collectors;
 
 public class ValidatorController{
 
-    /*
-        NOTE: as of Jan 2019, source of truth URL for OpenAPI 3.0 JSON schema is not yet stable,
-        therefore the latest schema from the following commit in oas-schema branch has been copied locally
-        and is used for validation.
-
-        https://github.com/OAI/OpenAPI-Specification/blob/0684d656a7de8ec1e727e31fa268b7213351e090/schemas/v3.0/schema.yaml
-
-        TODO: once the source of truth gets finalized, the schema can be dynamically downloaded and cached, as done for v2
-
-        The following locations hold currently a (different) copy of v3 schema:
-
-        - https://github.com/OAI/OpenAPI-Specification/blob/oas3-schema/schemas/v3.0/schema.yaml (open PR #1270)
-        - http://23.22.16.221/v3/schema.json (comes from https://github.com/swagger-api/swagger-schema)
-     */
     static final String SCHEMA_FILE = "schema3.json";
-    /* SCHEMA_URL not in use, see note above
-    static final String SCHEMA_URL = "https://github.com/OAI/OpenAPI-Specification/blob/0684d656a7de8ec1e727e31fa268b7213351e090/schemas/v3.0/schema.yaml";
-    */
+    static final String SCHEMA_URL = "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/schemas/v3.0/schema.json";
 
     static final String SCHEMA2_FILE = "schema.json";
     static final String SCHEMA2_URL = "http://swagger.io/v2/schema.json";
@@ -79,6 +64,7 @@ public class ValidatorController{
 
     static Logger LOGGER = LoggerFactory.getLogger(ValidatorController.class);
     static long LAST_FETCH = 0;
+    static long LAST_FETCH_V3 = 0;
     static ObjectMapper JsonMapper = Json.mapper();
     static ObjectMapper YamlMapper = Yaml.mapper();
     private JsonSchema schemaV2;
@@ -351,14 +337,24 @@ public class ValidatorController{
         }
     }
 
-    // TODO see note above about V3 online version
     private JsonSchema getSchemaV3() throws Exception {
-        if (schemaV3 == null) {
-            schemaV3 = resolveJsonSchema(getResourceFileAsString(SCHEMA_FILE));
+        if (schemaV3 != null && (System.currentTimeMillis() - LAST_FETCH_V3) < 600000) {
+            return schemaV3;
         }
-        return schemaV3;
 
+        try {
+            LOGGER.debug("returning online schema v3");
+            LAST_FETCH_V3 = System.currentTimeMillis();
+            schemaV3 = resolveJsonSchema(getUrlContents(SCHEMA_URL), true);
+            return schemaV3;
+        } catch (Exception e) {
+            LOGGER.warn("error fetching schema v3 from GitHub, using local copy");
+            schemaV3 = resolveJsonSchema(getResourceFileAsString(SCHEMA_FILE), true);
+            LAST_FETCH_V3 = System.currentTimeMillis();
+            return schemaV3;
+        }
     }
+
     private JsonSchema getSchemaV2() throws Exception {
         if (schemaV2 != null && (System.currentTimeMillis() - LAST_FETCH) < 600000) {
             return schemaV2;
@@ -375,12 +371,25 @@ public class ValidatorController{
             LAST_FETCH = System.currentTimeMillis();
             return schemaV2;
         }
-
-
     }
 
     private JsonSchema resolveJsonSchema(String schemaAsString) throws Exception {
+        return resolveJsonSchema(schemaAsString, false);
+    }
+    private JsonSchema resolveJsonSchema(String schemaAsString, boolean removeId) throws Exception {
         JsonNode schemaObject = JsonMapper.readTree(schemaAsString);
+        if (removeId) {
+            ObjectNode oNode = (ObjectNode) schemaObject;
+            if (oNode.get("id") != null) {
+                oNode.remove("id");
+            }
+            if (oNode.get("$schema") != null) {
+                oNode.remove("$schema");
+            }
+            if (oNode.get("description") != null) {
+                oNode.remove("description");
+            }
+        }
         JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
         return factory.getJsonSchema(schemaObject);
 
