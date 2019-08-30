@@ -186,7 +186,6 @@ public class ValidatorController{
         }
 
         return new ResponseContext()
-                .contentType("application/json")
                 .entity(validationResponse);
         //return processDebugValidationResponse(validationResponse);
 
@@ -209,7 +208,6 @@ public class ValidatorController{
         }
 
         return new ResponseContext()
-                .contentType("application/json")
                 .entity(validationResponse);
         //return processDebugValidationResponse(validationResponse);
     }
@@ -236,13 +234,10 @@ public class ValidatorController{
             }
         }
 
-
         return new ResponseContext()
-                .contentType("application/json")
                 .entity(messages);
-
-
     }
+
     public ValidationResponse debugByUrl( RequestContext request, String url) throws Exception {
         ValidationResponse output = new ValidationResponse();
         String content;

@@ -7,3 +7,6 @@ entityProcessors:
   - yaml
 
 rootPath: /validator
+
+exposedSpecOptions:
+  useOriginalNotParsed: true
