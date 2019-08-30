@@ -2,7 +2,19 @@
 
 [![Build Status](https://img.shields.io/jenkins/s/https/jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-validator-badge-2.0.svg)](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-validator-badge-2.0)
 
-This project shows a "valid swagger" badge on your site.  There is an online version hosted on http://online.io/validator.  You can also pull a docker image of the validator directly from [DockerHub](https://hub.docker.com/r/swaggerapi/swagger-validator-v2/).
+This project shows a "valid swagger" badge on your site, supporting Swagger/OpenAPI 2.0 and OpenAPI 3.0 specifications.  
+
+There is an online version hosted on http://validator.swagger.io.  
+
+You can also pull a docker image of the validator directly from [DockerHub](https://hub.docker.com/r/swaggerapi/swagger-validator-v2/), e.g.:
+
+```
+docker pull swaggerapi/swagger-validator-v2:v2.0.1
+docker run -it -p 8080:8080 --name swagger-validator-v2 swaggerapi/swagger-validator-v2:v2.0.1
+```
+
+Web UI is reachable at http://localhost:8080/index.html and OpenAPI spec at http://localhost:8080/validator/openapi.json
+
 
 
 You can validate any OpenAPI specification against the [Swagger/OpenAPI 2.0 Schema](https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v2.0/schema.json) and [OpenAPI 3.0 Schema](https://github.com/OAI/OpenAPI-Specification/blob/v3.0.1/versions/3.0.1.md) as follows:
@@ -17,7 +29,7 @@ For example, using [https://raw.githubusercontent.com/OAI/OpenAPI-Specification/
 
 ![](https://validator.swagger.io/validator?url=https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v2.0/json/petstore-expanded.json)
 
-If your specification fails to validate for some reason, or if there is an error, you can get more information on why by visiting ```http://online.swagger.io/validator/debug?url={YOUR_URL}```.
+If your specification fails to validate for some reason, or if there is an error, you can get more information on why by visiting ```http://validator.swagger.io/validator/debug?url={YOUR_URL}```.
 
 Since the validator uses a browserless back-end to fetch the contents and schema, it's not subject to the terrible world of CORS.
 

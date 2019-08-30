@@ -129,6 +129,52 @@
                     </httpConnector>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <executions>
+                    <execution>
+                        <id>swagger-ui</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <skipCache>true</skipCache>
+                            <url>https://github.com/swagger-api/swagger-ui/archive/master.tar.gz</url>
+                            <unpack>true</unpack>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.6</version>
+                <executions>
+                    <execution>
+                        <id>copy-resources</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>target/${project.artifactId}-${project.version}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/swagger-ui-master/dist</directory>
+                                    <filtering>true</filtering>
+                                    <excludes>
+                                        <exclude>index.html</exclude>
+                                    </excludes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
     <dependencies>
@@ -196,11 +242,11 @@
     <properties>
 
         <testng-version>6.9.6</testng-version>
-        <jackson.version>2.9.8</jackson.version>
+        <jackson.version>2.9.9</jackson.version>
         <httpclient-version>4.5.1</httpclient-version>
         <maven-plugin-version>1.0.0</maven-plugin-version>
-        <swagger-parser-version>2.0.8</swagger-parser-version>
-        <swagger-inflector-version>2.0.0-rc3</swagger-inflector-version>
+        <swagger-parser-version>2.0.14</swagger-parser-version>
+        <swagger-inflector-version>2.0.3</swagger-inflector-version>
         <jetty-version>9.4.18.v20190429</jetty-version>
         <logback-version>1.0.1</logback-version>
         <slf4j-version>1.6.3</slf4j-version>

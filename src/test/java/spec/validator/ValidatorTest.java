@@ -12,7 +12,6 @@ import io.swagger.models.ValidationResponse;
 import io.swagger.oas.inflector.models.RequestContext;
 import io.swagger.oas.inflector.models.ResponseContext;
 
-import io.swagger.v3.core.util.Yaml;
 import org.apache.commons.io.FileUtils;
 
 import org.testng.Assert;
@@ -26,8 +25,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
@@ -252,8 +249,11 @@ public class ValidatorTest {
         ValidatorController validator = new ValidatorController();
         ResponseContext response = validator.reviewByUrl(new RequestContext(), url);
 
+        // since inflector 2.0.3 content type is managed by inflector according to request headers and spec
+/*
         Assert.assertEquals(APPLICATION, response.getContentType().getType());
         Assert.assertEquals(JSON, response.getContentType().getSubtype());
+*/
         ValidationResponse validationResponse = (ValidationResponse) response.getEntity();
         Assert.assertTrue(validationResponse.getMessages() == null || validationResponse.getMessages().size() == 0);
         Assert.assertTrue(validationResponse.getSchemaValidationMessages() == null || validationResponse.getSchemaValidationMessages().size() == 0);
@@ -268,8 +268,11 @@ public class ValidatorTest {
         ValidatorController validator = new ValidatorController();
         ResponseContext response = validator.reviewByUrl(new RequestContext(), url);
 
+        // since inflector 2.0.3 content type is managed by inflector according to request headers and spec
+/*
         Assert.assertEquals(APPLICATION, response.getContentType().getType());
         Assert.assertEquals(JSON, response.getContentType().getSubtype());
+*/
         ValidationResponse validationResponse = (ValidationResponse) response.getEntity();
         Assert.assertTrue(validationResponse.getMessages() == null || validationResponse.getMessages().size() == 0);
         Assert.assertTrue(validationResponse.getSchemaValidationMessages() == null || validationResponse.getSchemaValidationMessages().size() == 0);
@@ -283,8 +286,11 @@ public class ValidatorTest {
         ValidatorController validator = new ValidatorController();
         ResponseContext response = validator.reviewByUrl(new RequestContext(), url);
 
+        // since inflector 2.0.3 content type is managed by inflector according to request headers and spec
+/*
         Assert.assertEquals(APPLICATION, response.getContentType().getType());
         Assert.assertEquals(JSON, response.getContentType().getSubtype());
+*/
         ValidationResponse validationResponse = (ValidationResponse) response.getEntity();
         Assert.assertTrue(validationResponse.getMessages().contains(INFO_MISSING));
         Assert.assertTrue(validationResponse.getSchemaValidationMessages().get(0).getMessage().equals(INFO_MISSING_SCHEMA));
@@ -299,8 +305,11 @@ public class ValidatorTest {
         ValidatorController validator = new ValidatorController();
         ResponseContext response = validator.reviewByUrl(new RequestContext(), url);
 
+        // since inflector 2.0.3 content type is managed by inflector according to request headers and spec
+/*
         Assert.assertEquals(APPLICATION, response.getContentType().getType());
         Assert.assertEquals(JSON, response.getContentType().getSubtype());
+*/
         ValidationResponse validationResponse = (ValidationResponse) response.getEntity();
         Assert.assertTrue(validationResponse.getMessages().contains(INFO_MISSING));
         Assert.assertTrue(validationResponse.getSchemaValidationMessages().get(0).getMessage().equals(INFO_MISSING_SCHEMA));
@@ -314,8 +323,12 @@ public class ValidatorTest {
         ValidatorController validator = new ValidatorController();
         ResponseContext response = validator.reviewByContent(new RequestContext(), rootNode);
 
+        // since inflector 2.0.3 content type is managed by inflector according to request headers and spec
+/*
         Assert.assertEquals(APPLICATION, response.getContentType().getType());
         Assert.assertEquals(JSON, response.getContentType().getSubtype());
+*/
+
         ValidationResponse validationResponse = (ValidationResponse) response.getEntity();
         Assert.assertTrue(validationResponse.getMessages().contains(INFO_MISSING));
         Assert.assertTrue(validationResponse.getSchemaValidationMessages().get(0).getMessage().equals(INFO_MISSING_SCHEMA));
@@ -328,8 +341,11 @@ public class ValidatorTest {
         ValidatorController validator = new ValidatorController();
         ResponseContext response = validator.reviewByContent(new RequestContext(), rootNode);
 
+        // since inflector 2.0.3 content type is managed by inflector according to request headers and spec
+/*
         Assert.assertEquals(APPLICATION, response.getContentType().getType());
         Assert.assertEquals(JSON, response.getContentType().getSubtype());
+*/
         ValidationResponse validationResponse = (ValidationResponse) response.getEntity();
         Assert.assertTrue(validationResponse.getMessages().contains(INFO_MISSING));
         Assert.assertTrue(validationResponse.getSchemaValidationMessages().get(0).getMessage().equals(INFO_MISSING_SCHEMA));
@@ -342,8 +358,11 @@ public class ValidatorTest {
         ValidatorController validator = new ValidatorController();
         ResponseContext response = validator.reviewByContent(new RequestContext(), rootNode);
 
+        // since inflector 2.0.3 content type is managed by inflector according to request headers and spec
+/*
         Assert.assertEquals(APPLICATION, response.getContentType().getType());
         Assert.assertEquals(JSON, response.getContentType().getSubtype());
+*/
         ValidationResponse validationResponse = (ValidationResponse) response.getEntity();
         Assert.assertTrue(validationResponse.getMessages() == null || validationResponse.getMessages().size() == 0);
         Assert.assertTrue(validationResponse.getSchemaValidationMessages() == null || validationResponse.getSchemaValidationMessages().size() == 0);
@@ -356,8 +375,11 @@ public class ValidatorTest {
         ValidatorController validator = new ValidatorController();
         ResponseContext response = validator.reviewByContent(new RequestContext(), rootNode);
 
+        // since inflector 2.0.3 content type is managed by inflector according to request headers and spec
+/*
         Assert.assertEquals(APPLICATION, response.getContentType().getType());
         Assert.assertEquals(JSON, response.getContentType().getSubtype());
+*/
         ValidationResponse validationResponse = (ValidationResponse) response.getEntity();
         Assert.assertTrue(validationResponse.getMessages() == null || validationResponse.getMessages().size() == 0);
         Assert.assertTrue(validationResponse.getSchemaValidationMessages() == null || validationResponse.getSchemaValidationMessages().size() == 0);
