@@ -1,17 +1,13 @@
-from openjdk:8-jre
+FROM openjdk:8-jre-alpine
 
 WORKDIR /validator
-RUN mkdir -p /validator/webapp/WEB-INF/lib
 
-COPY target/lib/jetty-runner* /validator/jetty-runner.jar
-COPY bin/run.sh /validator/
-
-COPY src/main/webapp /validator/webapp
-
-COPY target/lib/* /validator/webapp/WEB-INF/lib/
-RUN rm /validator/webapp/WEB-INF/lib/jetty*
-COPY target/classes /validator/webapp/WEB-INF/classes
-
+COPY target/lib/jetty-runner.jar /validator/jetty-runner.jar
+COPY target/*.war /validator/server.war
+COPY src/main/swagger/swagger.yaml /validator/
+COPY inflector.yaml /validator/
 
 EXPOSE 8080
-CMD ["bash", "/validator/run.sh"]
+
+CMD ["java", "-jar", "-DswaggerUrl=swagger.yaml", "/validator/jetty-runner.jar", "/validator/server.war"]
+

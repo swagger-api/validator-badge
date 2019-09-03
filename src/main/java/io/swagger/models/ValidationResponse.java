@@ -1,4 +1,4 @@
-package io.swagger.validator.models;
+package io.swagger.models;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,34 +1,50 @@
 # Swagger Validator Badge <img src="https://raw.githubusercontent.com/swagger-api/swagger.io/wordpress/images/assets/SW-logo-clr.png" height="50" align="right">
 
 [![Build Status](https://img.shields.io/jenkins/s/https/jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-validator-badge-master.svg)](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-validator-badge-master)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-validator/badge.svg?style=plastic)](https://maven-badges.herokuapp.com/maven-central/io.swagger/swagger-validator)
-[![Build Status](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-validator-badge-master/badge/icon?subject=jenkins%20build)](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-validator-badge-master/)
 
-This project shows a "valid swagger" badge on your site.  There is an online version hosted on http://swagger.io.  You can also pull a docker image of the validator directly from [DockerHub](https://hub.docker.com/r/swaggerapi/swagger-validator/).
+This project shows a "valid swagger" badge on your site, supporting Swagger/OpenAPI 2.0 and OpenAPI 3.0 specifications.  
 
-You can validate any OpenAPI specification against the [OpenAPI 2.0 Schema](https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v2.0/schema.json) as follows:
+There is an online version hosted on http://validator.swagger.io.  
+
+You can also pull a docker image of the validator directly from [DockerHub](https://hub.docker.com/r/swaggerapi/swagger-validator-v2/), e.g.:
 
 ```
-<img src="http://online.swagger.io/validator?url={YOUR_URL}">
+docker pull swaggerapi/swagger-validator-v2:v2.0.1
+docker run -it -p 8080:8080 --name swagger-validator-v2 swaggerapi/swagger-validator-v2:v2.0.1
+```
+
+Web UI is reachable at http://localhost:8080/index.html and OpenAPI spec at http://localhost:8080/validator/openapi.json
+
+
+
+You can validate any OpenAPI specification against the [Swagger/OpenAPI 2.0 Schema](https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v2.0/schema.json) and [OpenAPI 3.0 Schema](https://github.com/OAI/OpenAPI-Specification/blob/v3.0.1/versions/3.0.1.md) as follows:
+
+```
+<img src="http://validator.swagger.io/validator?url={YOUR_URL}">
 ```
 
 Of course the `YOUR_URL` needs to be addressable by the validator (i.e. won't find anything on localhost).  If it validates, you'll get a nice green VALID logo.  Failures will give an INVALID logo, and if there are errors parsing the specification or reaching it, an ugly red ERROR logo.
 
 For example, using [https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v2.0/json/petstore-expanded.json](https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v2.0/json/petstore-expanded.json) as a source, we get ...
 
-![](https://online.swagger.io/validator?url=https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v2.0/json/petstore-expanded.json)
+![](https://validator.swagger.io/validator?url=https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v2.0/json/petstore-expanded.json)
 
-If your specification fails to validate for some reason, or if there is an error, you can get more information on why by visiting ```http://online.swagger.io/validator/debug?url={YOUR_URL}```.
+If your specification fails to validate for some reason, or if there is an error, you can get more information on why by visiting ```http://validator.swagger.io/validator/debug?url={YOUR_URL}```.
 
 Since the validator uses a browserless back-end to fetch the contents and schema, it's not subject to the terrible world of CORS.
 
 You can also post a spec up to the service with CURL:
 
 ```
-curl -X POST -d @swagger.json -H 'Content-Type:application/json' http://online.swagger.io/validator/debug
+curl -X POST -d @swagger.json -H 'Content-Type:application/json' http://validator.swagger.io/validator/debug
 ```
 
 In this example, `swagger.json` is the swagger definition in JSON format, in the CWD.
+
+Note that all the above is also applicable to OpenAPI 3.0 specifications; for example, using [https://petstore3.swagger.io/api/v3/openapi.json](https://petstore3.swagger.io/api/v3/openapi.json) as a source, we get ...
+
+![](https://validator.swagger.io/validator?url=https://petstore3.swagger.io/api/v3/openapi.json)
+
 
 ### Running locally
 
@@ -41,13 +57,16 @@ mvn package jetty:run
 And access the validator like such:
 
 ```
-http://localhost:8002/?url={URL}
+http://localhost:8080/validator?url={URL}
 ```
 
 or
 
 ```
-http://localhost:8002/?url=http://petstore.swagger.io/v2/swagger.json
+http://localhost:8080/validator?url=http://petstore.swagger.io/v2/swagger.json
+```
+```
+http://localhost:8080/validator?url=https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v3.0/petstore.yaml
 ```
 
 ## Security contact

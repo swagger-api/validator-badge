@@ -1,4 +1,4 @@
-package io.swagger.validator.models;
+package io.swagger.models;
 
 public class Schema {
     private String loadingURI, pointer;
