@@ -52,6 +52,10 @@
                 <version>${surefire-version}</version>
                 <configuration>
                     <testNGArtifactName>none:none</testNGArtifactName>
+                    <systemPropertyVariables>
+                        <rejectLocal>false</rejectLocal>
+                        <rejectRedirect>false</rejectRedirect>
+                    </systemPropertyVariables>
                 </configuration>
                 <executions>
                     <execution>
@@ -240,7 +244,6 @@
         </repository>
     </repositories>
     <properties>
-
         <testng-version>6.9.6</testng-version>
         <jackson.version>2.9.10</jackson.version>
         <httpclient-version>4.5.1</httpclient-version>
