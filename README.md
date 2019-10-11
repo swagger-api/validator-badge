@@ -13,6 +13,16 @@ docker pull swaggerapi/swagger-validator-v2:v2.0.1
 docker run -it -p 8080:8080 --name swagger-validator-v2 swaggerapi/swagger-validator-v2:v2.0.1
 ```
 
+Since version `2.0.2` local and non http/https urls are rejected by default, along with redirects; this is controllable with docker env variables / java system properties:
+
+```
+docker run -it -p 8080:8080 -e "REJECT_LOCAL=false" -e "REJECT_REDIRECT=false" --name swagger-validator-v2 swaggerapi/swagger-validator-v2:v2.0.1
+```
+
+In non docker environments, system properties `rejectLocal` and `rejectRedirect` can be used.
+
+
+
 Web UI is reachable at http://localhost:8080/index.html and OpenAPI spec at http://localhost:8080/validator/openapi.json
 
 

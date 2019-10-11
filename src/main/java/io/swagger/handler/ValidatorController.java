@@ -30,6 +30,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.ssl.SSLContextBuilder;
 import org.apache.http.ssl.TrustStrategy;
@@ -43,6 +44,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -69,6 +72,9 @@ public class ValidatorController{
     static ObjectMapper YamlMapper = Yaml.mapper();
     private JsonSchema schemaV2;
     private JsonSchema schemaV3;
+
+    static boolean rejectLocal = StringUtils.isBlank(System.getProperty("rejectLocal")) ? true : Boolean.parseBoolean(System.getProperty("rejectLocal"));
+    static boolean rejectRedirect = StringUtils.isBlank(System.getProperty("rejectRedirect")) ? true : Boolean.parseBoolean(System.getProperty("rejectRedirect"));
 
     public ResponseContext validateByUrl(RequestContext request , String url) {
 
@@ -238,7 +244,7 @@ public class ValidatorController{
 
         // read the spec contents, bail if it fails
         try {
-            content = getUrlContents(url);
+            content = getUrlContents(url, ValidatorController.rejectLocal, ValidatorController.rejectRedirect);
         } catch (Exception e) {
             ProcessingMessage pm = new ProcessingMessage();
             pm.setLogLevel(LogLevel.ERROR);
@@ -394,7 +400,7 @@ public class ValidatorController{
         return factory.getJsonSchema(schemaObject);
 
     }
-    private CloseableHttpClient getCarelessHttpClient() {
+    private CloseableHttpClient getCarelessHttpClient(boolean disableRedirect) {
         CloseableHttpClient httpClient = null;
 
         try {
@@ -405,10 +411,13 @@ public class ValidatorController{
                 }
             });
             SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build(), NoopHostnameVerifier.INSTANCE);
-            httpClient = HttpClients
+            HttpClientBuilder httpClientBuilder = HttpClients
                     .custom()
-                    .setSSLSocketFactory(sslsf)
-                    .build();
+                    .setSSLSocketFactory(sslsf);
+            if (disableRedirect) {
+                httpClientBuilder.disableRedirectHandling();
+            }
+            httpClient = httpClientBuilder.build();
         } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
             LOGGER.error("can't disable SSL verification", e);
         }
@@ -417,9 +426,18 @@ public class ValidatorController{
     }
 
     private String getUrlContents(String urlString) throws IOException {
+        return getUrlContents(urlString, false, false);
+    }
+    private String getUrlContents(String urlString, boolean rejectLocal, boolean rejectRedirect) throws IOException {
         LOGGER.trace("fetching URL contents");
-
-        final CloseableHttpClient httpClient = getCarelessHttpClient();
+        URL url = new URL(urlString);
+        if(rejectLocal) {
+            InetAddress inetAddress = InetAddress.getByName(url.getHost());
+            if(inetAddress.isAnyLocalAddress() || inetAddress.isLoopbackAddress() || inetAddress.isLinkLocalAddress()) {
+                throw new IOException("Only accepts http/https protocol");
+            }
+        }
+        final CloseableHttpClient httpClient = getCarelessHttpClient(rejectRedirect);
 
         RequestConfig.Builder requestBuilder = RequestConfig.custom();
         requestBuilder = requestBuilder

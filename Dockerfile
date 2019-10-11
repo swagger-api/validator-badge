@@ -7,7 +7,9 @@ COPY target/*.war /validator/server.war
 COPY src/main/swagger/swagger.yaml /validator/
 COPY inflector.yaml /validator/
 
+ENV REJECT_REDIRECT "true"
+ENV REJECT_LOCAL "true"
 EXPOSE 8080
 
-CMD ["java", "-jar", "-DswaggerUrl=swagger.yaml", "/validator/jetty-runner.jar", "/validator/server.war"]
+CMD java -jar -DswaggerUrl=swagger.yaml -DrejectLocal=${REJECT_LOCAL} -DrejectRedirect=${REJECT_REDIRECT} /validator/jetty-runner.jar /validator/server.war
 
