@@ -248,8 +248,8 @@
         <jackson.version>2.9.10</jackson.version>
         <httpclient-version>4.5.1</httpclient-version>
         <maven-plugin-version>1.0.0</maven-plugin-version>
-        <swagger-parser-version>2.0.14</swagger-parser-version>
-        <swagger-inflector-version>2.0.3</swagger-inflector-version>
+        <swagger-parser-version>2.0.15</swagger-parser-version>
+        <swagger-inflector-version>2.0.4</swagger-inflector-version>
         <jetty-version>9.4.18.v20190429</jetty-version>
         <logback-version>1.0.1</logback-version>
         <slf4j-version>1.6.3</slf4j-version>
