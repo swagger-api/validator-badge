@@ -9,14 +9,14 @@ There is an online version hosted on http://validator.swagger.io.
 You can also pull a docker image of the validator directly from [DockerHub](https://hub.docker.com/r/swaggerapi/swagger-validator-v2/), e.g.:
 
 ```
-docker pull swaggerapi/swagger-validator-v2:v2.0.2
-docker run -it -p 8080:8080 --name swagger-validator-v2 swaggerapi/swagger-validator-v2:v2.0.2
+docker pull swaggerapi/swagger-validator-v2:v2.0.3
+docker run -it -p 8080:8080 --name swagger-validator-v2 swaggerapi/swagger-validator-v2:v2.0.3
 ```
 
 Since version `2.0.2` local and non http/https urls are rejected by default, along with redirects; this is controllable with docker env variables / java system properties:
 
 ```
-docker run -it -p 8080:8080 -e "REJECT_LOCAL=false" -e "REJECT_REDIRECT=false" --name swagger-validator-v2 swaggerapi/swagger-validator-v2:v2.0.2
+docker run -it -p 8080:8080 -e "REJECT_LOCAL=false" -e "REJECT_REDIRECT=false" --name swagger-validator-v2 swaggerapi/swagger-validator-v2:v2.0.3
 ```
 
 In non docker environments, system properties `rejectLocal` and `rejectRedirect` can be used.
