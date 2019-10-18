@@ -417,6 +417,7 @@ public class ValidatorController{
             if (disableRedirect) {
                 httpClientBuilder.disableRedirectHandling();
             }
+            httpClientBuilder.setUserAgent("swagger-validator");
             httpClient = httpClientBuilder.build();
         } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
             LOGGER.error("can't disable SSL verification", e);
