@@ -42,10 +42,10 @@ paths:
       requestBody:
         description: the specification to validate
         content:
-          "application/json":
+          "application/yaml":
             schema:
               type: object
-          "application/yaml":
+          "application/json":
             schema:
               type: object
         required: true
@@ -77,10 +77,10 @@ paths:
         '200':
           description: result of validation as a validation response
           content:
-            "application/json":
+            "application/yaml":
               schema:
                 $ref: '#/components/schemas/ValidationResponse'
-            "application/yaml":
+            "application/json":
               schema:
                 $ref: '#/components/schemas/ValidationResponse'
     post:
@@ -105,10 +105,10 @@ paths:
         '200':
           description: result of validation as a validation response
           content:
-            "application/json":
+            "application/yaml":
               schema:
                 $ref: '#/components/schemas/ValidationResponse'
-            "application/yaml":
+            "application/json":
               schema:
                 $ref: '#/components/schemas/ValidationResponse'
 components:
