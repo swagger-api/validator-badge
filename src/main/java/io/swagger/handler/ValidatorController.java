@@ -88,6 +88,7 @@ public class ValidatorController{
         try {
             validationResponse = debugByUrl(request, url);
         }catch (Exception e){
+            LOGGER.warn( "Failed to process URL", e );
             return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process URL" );
         }
 
