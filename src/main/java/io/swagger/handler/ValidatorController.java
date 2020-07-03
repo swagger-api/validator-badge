@@ -87,12 +87,17 @@ public class ValidatorController{
         ValidationResponse validationResponse = null;
         try {
             validationResponse = debugByUrl(request, url);
-        }catch (Exception e){
-            LOGGER.warn( "Failed to process URL", e );
-            return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process URL" );
+        } catch ( Exception e ) {
+            return handleFailure( "Failed to process URL", e );
         }
 
         return processValidationResponse(validationResponse);
+    }
+
+    private ResponseContext handleFailure( String loggedMessage, Exception e )
+    {
+        LOGGER.error( loggedMessage, e );
+        return new ResponseContext().status( Response.Status.INTERNAL_SERVER_ERROR).entity( loggedMessage );
     }
 
     public ResponseContext validateByContent(RequestContext request, JsonNode inputSpec) {
@@ -106,8 +111,8 @@ public class ValidatorController{
         ValidationResponse validationResponse = null;
         try {
             validationResponse = debugByContent(request ,inputAsString);
-        }catch (Exception e){
-            return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process URL" );
+        } catch ( Exception e ) {
+            return handleFailure( "Failed to process URL", e );
         }
 
         return processValidationResponse(validationResponse);
@@ -174,8 +179,8 @@ public class ValidatorController{
         ValidationResponse validationResponse = null;
         try {
             validationResponse = debugByUrl(request, url);
-        }catch (Exception e){
-            return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process specification" );
+        } catch ( Exception e ) {
+            return handleFailure( "Failed to process specification", e );
         }
 
         return new ResponseContext()
@@ -196,8 +201,8 @@ public class ValidatorController{
         ValidationResponse validationResponse = null;
         try {
             validationResponse = debugByContent(request ,inputAsString);
-        }catch (Exception e){
-            return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process specification" );
+        } catch ( Exception e ) {
+            return handleFailure( "Failed to process specification", e );
         }
 
         return new ResponseContext()
