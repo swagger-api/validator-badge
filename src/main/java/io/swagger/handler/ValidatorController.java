@@ -76,7 +76,7 @@ public class ValidatorController{
     static boolean rejectLocal = StringUtils.isBlank(System.getProperty("rejectLocal")) ? true : Boolean.parseBoolean(System.getProperty("rejectLocal"));
     static boolean rejectRedirect = StringUtils.isBlank(System.getProperty("rejectRedirect")) ? true : Boolean.parseBoolean(System.getProperty("rejectRedirect"));
 
-    public ResponseContext validateByUrl(RequestContext request , String url) {
+    public ResponseContext validateByUrl(RequestContext request, String url) {
 
         if(url == null) {
             return new ResponseContext()
@@ -104,7 +104,7 @@ public class ValidatorController{
 
         ValidationResponse validationResponse = null;
         try {
-            validationResponse = debugByContent(request ,inputAsString);
+            validationResponse = debugByContent(request, inputAsString);
         }catch (Exception e){
             return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process URL" );
         }
@@ -162,7 +162,7 @@ public class ValidatorController{
                     .entity(this.getClass().getClassLoader().getResourceAsStream("invalid.png"));
         }
     }
-    public ResponseContext reviewByUrl(RequestContext request , String url) {
+    public ResponseContext reviewByUrl(RequestContext request, String url) {
 
         if(url == null) {
             return new ResponseContext()
@@ -194,7 +194,7 @@ public class ValidatorController{
 
         ValidationResponse validationResponse = null;
         try {
-            validationResponse = debugByContent(request ,inputAsString);
+            validationResponse = debugByContent(request, inputAsString);
         }catch (Exception e){
             return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process specification" );
         }
