@@ -30,7 +30,7 @@ Web UI is reachable at http://localhost:8080/index.html and OpenAPI spec at http
 You can validate any OpenAPI specification against the [Swagger/OpenAPI 2.0 Schema](https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v2.0/schema.json) and [OpenAPI 3.0 Schema](https://github.com/OAI/OpenAPI-Specification/blob/v3.0.1/versions/3.0.1.md) as follows:
 
 ```
-<img src="http://validator.swagger.io/validator?url={YOUR_URL}">
+<img src="https://validator.swagger.io/validator?url={YOUR_URL}">
 ```
 
 Of course the `YOUR_URL` needs to be addressable by the validator (i.e. won't find anything on localhost).  If it validates, you'll get a nice green VALID logo.  Failures will give an INVALID logo, and if there are errors parsing the specification or reaching it, an ugly red ERROR logo.
@@ -39,14 +39,14 @@ For example, using [https://raw.githubusercontent.com/OAI/OpenAPI-Specification/
 
 ![](https://validator.swagger.io/validator?url=https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/examples/v2.0/json/petstore-expanded.json)
 
-If your specification fails to validate for some reason, or if there is an error, you can get more information on why by visiting ```http://validator.swagger.io/validator/debug?url={YOUR_URL}```.
+If your specification fails to validate for some reason, or if there is an error, you can get more information on why by visiting ```https://validator.swagger.io/validator/debug?url={YOUR_URL}```.
 
 Since the validator uses a browserless back-end to fetch the contents and schema, it's not subject to the terrible world of CORS.
 
 You can also post a spec up to the service with CURL:
 
 ```
-curl -X POST -d @swagger.json -H 'Content-Type:application/json' http://validator.swagger.io/validator/debug
+curl -X POST -d @swagger.json -H 'Content-Type:application/json' https://validator.swagger.io/validator/debug
 ```
 
 In this example, `swagger.json` is the swagger definition in JSON format, in the CWD.
