@@ -57,8 +57,7 @@ import java.util.stream.Collectors;
 
 public class ValidatorController{
 
-    static final String SCHEMA_FILE = "schema3.json";
-    static final String SCHEMA_URL = "https://raw.githubusercontent.com/OAI/OpenAPI-Specification/master/schemas/v3.0/schema.json";
+    static final String SCHEMA_FILE = "schema3-fix-format-uri-reference.json";
 
     static final String SCHEMA2_FILE = "schema.json";
     static final String SCHEMA2_URL = "http://swagger.io/v2/schema.json";
@@ -67,7 +66,6 @@ public class ValidatorController{
 
     static Logger LOGGER = LoggerFactory.getLogger(ValidatorController.class);
     static long LAST_FETCH = 0;
-    static long LAST_FETCH_V3 = 0;
     static ObjectMapper JsonMapper = Json.mapper();
     static ObjectMapper YamlMapper = Yaml.mapper();
     private JsonSchema schemaV2;
@@ -344,21 +342,10 @@ public class ValidatorController{
     }
 
     private JsonSchema getSchemaV3() throws Exception {
-        if (schemaV3 != null && (System.currentTimeMillis() - LAST_FETCH_V3) < 600000) {
-            return schemaV3;
-        }
-
-        try {
-            LOGGER.debug("returning online schema v3");
-            LAST_FETCH_V3 = System.currentTimeMillis();
-            schemaV3 = resolveJsonSchema(getUrlContents(SCHEMA_URL), true);
-            return schemaV3;
-        } catch (Exception e) {
-            LOGGER.warn("error fetching schema v3 from GitHub, using local copy");
+        if (schemaV3 == null) {
             schemaV3 = resolveJsonSchema(getResourceFileAsString(SCHEMA_FILE), true);
-            LAST_FETCH_V3 = System.currentTimeMillis();
-            return schemaV3;
         }
+        return schemaV3;
     }
 
     private JsonSchema getSchemaV2() throws Exception {

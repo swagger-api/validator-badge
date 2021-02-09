@@ -9,7 +9,7 @@
     <artifactId>swagger-validator</artifactId>
     <packaging>war</packaging>
     <name>swagger-validator</name>
-    <version>2.0.5-SNAPSHOT</version>
+    <version>2.0.5</version>
     <prerequisites>
         <maven>2.2.0</maven>
     </prerequisites>
@@ -190,6 +190,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.github.java-json-tools</groupId>
+            <artifactId>json-schema-validator</artifactId>
+            <version>${json-schema-validator-version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>io.swagger.parser.v3</groupId>
             <artifactId>swagger-parser</artifactId>
             <version>${swagger-parser-version}</version>
@@ -264,7 +270,7 @@
     <properties>
         <testng-version>6.9.6</testng-version>
         <jackson.version>2.11.1</jackson.version>
-        <snakeyaml.version>1.26</snakeyaml.version>
+        <snakeyaml.version>1.27</snakeyaml.version>
         <httpclient-version>4.5.1</httpclient-version>
         <maven-plugin-version>1.0.0</maven-plugin-version>
         <swagger-parser-version>2.0.24</swagger-parser-version>
@@ -273,6 +279,6 @@
         <logback-version>1.0.1</logback-version>
         <slf4j-version>1.6.3</slf4j-version>
         <surefire-version>2.18.1</surefire-version>
-
+        <json-schema-validator-version>2.2.14</json-schema-validator-version>
     </properties>
 </project>
