@@ -271,7 +271,7 @@
         <testng-version>6.9.6</testng-version>
         <jackson.version>2.11.1</jackson.version>
         <snakeyaml.version>1.27</snakeyaml.version>
-        <httpclient-version>4.5.1</httpclient-version>
+        <httpclient-version>4.5.13</httpclient-version>
         <maven-plugin-version>1.0.0</maven-plugin-version>
         <swagger-parser-version>2.0.24</swagger-parser-version>
         <swagger-inflector-version>2.0.4</swagger-inflector-version>
