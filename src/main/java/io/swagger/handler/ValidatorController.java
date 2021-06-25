@@ -9,19 +9,17 @@ import com.github.fge.jsonschema.core.report.ProcessingMessage;
 import com.github.fge.jsonschema.core.report.ProcessingReport;
 import com.github.fge.jsonschema.main.JsonSchema;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
-import io.swagger.oas.inflector.models.RequestContext;
-import io.swagger.oas.inflector.models.ResponseContext;
-
-import io.swagger.parser.SwaggerParser;
-import io.swagger.v3.parser.core.models.SwaggerParseResult;
-import io.swagger.parser.util.SwaggerDeserializationResult;
-import io.swagger.v3.parser.OpenAPIV3Parser;
-import io.swagger.util.Json;
-import io.swagger.util.Yaml;
 import io.swagger.models.SchemaValidationError;
 import io.swagger.models.ValidationResponse;
+import io.swagger.oas.inflector.models.RequestContext;
+import io.swagger.oas.inflector.models.ResponseContext;
+import io.swagger.parser.SwaggerParser;
+import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.util.Json;
+import io.swagger.util.Yaml;
+import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.lang3.StringUtils;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.client.config.RequestConfig;
@@ -37,7 +35,6 @@ import org.apache.http.ssl.TrustStrategy;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 import javax.ws.rs.core.Response;
 import java.io.BufferedReader;
@@ -85,11 +82,17 @@ public class ValidatorController{
         ValidationResponse validationResponse = null;
         try {
             validationResponse = debugByUrl(request, url);
-        }catch (Exception e){
-            return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process URL" );
+        } catch ( Exception e ) {
+            return handleFailure( "Failed to process URL", e );
         }
 
         return processValidationResponse(validationResponse);
+    }
+
+    private ResponseContext handleFailure( String loggedMessage, Exception e )
+    {
+        LOGGER.error( loggedMessage, e );
+        return new ResponseContext().status( Response.Status.INTERNAL_SERVER_ERROR).entity( loggedMessage );
     }
 
     public ResponseContext validateByContent(RequestContext request, JsonNode inputSpec) {
@@ -103,8 +106,8 @@ public class ValidatorController{
         ValidationResponse validationResponse = null;
         try {
             validationResponse = debugByContent(request ,inputAsString);
-        }catch (Exception e){
-            return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process URL" );
+        } catch ( Exception e ) {
+            return handleFailure( "Failed to process URL", e );
         }
 
         return processValidationResponse(validationResponse);
@@ -171,8 +174,8 @@ public class ValidatorController{
         ValidationResponse validationResponse = null;
         try {
             validationResponse = debugByUrl(request, url);
-        }catch (Exception e){
-            return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process specification" );
+        } catch ( Exception e ) {
+            return handleFailure( "Failed to process specification", e );
         }
 
         return new ResponseContext()
@@ -193,8 +196,8 @@ public class ValidatorController{
         ValidationResponse validationResponse = null;
         try {
             validationResponse = debugByContent(request ,inputAsString);
-        }catch (Exception e){
-            return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process specification" );
+        } catch ( Exception e ) {
+            return handleFailure( "Failed to process specification", e );
         }
 
         return new ResponseContext()
