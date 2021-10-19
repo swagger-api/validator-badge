@@ -9,19 +9,17 @@ import com.github.fge.jsonschema.core.report.ProcessingMessage;
 import com.github.fge.jsonschema.core.report.ProcessingReport;
 import com.github.fge.jsonschema.main.JsonSchema;
 import com.github.fge.jsonschema.main.JsonSchemaFactory;
-import io.swagger.oas.inflector.models.RequestContext;
-import io.swagger.oas.inflector.models.ResponseContext;
-
-import io.swagger.parser.SwaggerParser;
-import io.swagger.v3.parser.core.models.SwaggerParseResult;
-import io.swagger.parser.util.SwaggerDeserializationResult;
-import io.swagger.v3.parser.OpenAPIV3Parser;
-import io.swagger.util.Json;
-import io.swagger.util.Yaml;
 import io.swagger.models.SchemaValidationError;
 import io.swagger.models.ValidationResponse;
+import io.swagger.oas.inflector.models.RequestContext;
+import io.swagger.oas.inflector.models.ResponseContext;
+import io.swagger.parser.SwaggerParser;
+import io.swagger.parser.util.SwaggerDeserializationResult;
+import io.swagger.util.Json;
+import io.swagger.util.Yaml;
+import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.lang3.StringUtils;
-
 import org.apache.http.HttpEntity;
 import org.apache.http.StatusLine;
 import org.apache.http.client.config.RequestConfig;
@@ -38,12 +36,12 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-import javax.ws.rs.core.Response;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.URL;
 import java.security.KeyManagementException;
@@ -52,20 +50,22 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import javax.ws.rs.core.Response;
 
 public class ValidatorController{
 
     static final String SCHEMA_FILE = "schema3-fix-format-uri-reference.json";
 
     static final String SCHEMA2_FILE = "schema.json";
-    static final String SCHEMA2_URL = "http://swagger.io/v2/schema.json";
 
     static final String INVALID_VERSION = "Deprecated Swagger version.  Please visit http://swagger.io for information on upgrading to Swagger/OpenAPI 2.0 or OpenAPI 3.0";
 
     static Logger LOGGER = LoggerFactory.getLogger(ValidatorController.class);
-    static long LAST_FETCH = 0;
     static ObjectMapper JsonMapper = Json.mapper();
     static ObjectMapper YamlMapper = Yaml.mapper();
     private JsonSchema schemaV2;
@@ -86,7 +86,7 @@ public class ValidatorController{
         try {
             validationResponse = debugByUrl(request, url);
         }catch (Exception e){
-            return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process URL" );
+            return processException("Failed to process URL " + url, e);
         }
 
         return processValidationResponse(validationResponse);
@@ -104,7 +104,7 @@ public class ValidatorController{
         try {
             validationResponse = debugByContent(request ,inputAsString);
         }catch (Exception e){
-            return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process URL" );
+            return processException("Failed to process", e);
         }
 
         return processValidationResponse(validationResponse);
@@ -172,7 +172,7 @@ public class ValidatorController{
         try {
             validationResponse = debugByUrl(request, url);
         }catch (Exception e){
-            return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process specification" );
+            return processException("Failed to process specification for " + url, e);
         }
 
         return new ResponseContext()
@@ -194,7 +194,7 @@ public class ValidatorController{
         try {
             validationResponse = debugByContent(request ,inputAsString);
         }catch (Exception e){
-            return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity( "Failed to process specification" );
+            return processException("Failed to process specification", e);
         }
 
         return new ResponseContext()
@@ -349,21 +349,11 @@ public class ValidatorController{
     }
 
     private JsonSchema getSchemaV2() throws Exception {
-        if (schemaV2 != null && (System.currentTimeMillis() - LAST_FETCH) < 600000) {
+        if (schemaV2 != null) {
             return schemaV2;
         }
-
-        try {
-            LOGGER.debug("returning online schema");
-            LAST_FETCH = System.currentTimeMillis();
-            schemaV2 = resolveJsonSchema(getUrlContents(SCHEMA2_URL));
-            return schemaV2;
-        } catch (Exception e) {
-            LOGGER.warn("error fetching schema from GitHub, using local copy");
-            schemaV2 = resolveJsonSchema(getResourceFileAsString(SCHEMA2_FILE));
-            LAST_FETCH = System.currentTimeMillis();
-            return schemaV2;
-        }
+        schemaV2 = resolveJsonSchema(getResourceFileAsString(SCHEMA2_FILE));
+        return schemaV2;
     }
 
     private JsonSchema resolveJsonSchema(String schemaAsString) throws Exception {
@@ -513,4 +503,32 @@ public class ValidatorController{
         return null;
     }
 
+    private static ResponseContext processException(final String message, final Throwable throwable) {
+        LOGGER.error(message, throwable);
+        return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity(convertThrowableToJsonString(message, throwable));
+    }
+
+    private static String convertThrowableToJsonString(final String message, final Throwable throwable) {
+        Map<String, String> map = new HashMap<>();
+        map.put("message", message);
+        map.put("stacktrace", getStackTrace(throwable));
+        return convertToJson(map);
+    }
+
+    private static String convertToJson(Object object) {
+        StringWriter stringWriter = new StringWriter();
+        try {
+            JsonMapper.writeValue(stringWriter, object);
+        } catch (IOException e) {
+            LOGGER.error("Could not convert object data to json.", e);
+        }
+        return stringWriter.toString();
+    }
+
+    private static String getStackTrace(final Throwable throwable) {
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw, true);
+        throwable.printStackTrace(pw);
+        return sw.getBuffer().toString();
+    }
 }
