@@ -35,6 +35,7 @@ import org.apache.http.ssl.TrustStrategy;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -85,7 +86,7 @@ public class ValidatorController{
         try {
             validationResponse = debugByUrl(request, url);
         }catch (Exception e){
-            return processException("Failed to process URL " + url, e);
+            return handleFailure("Failed to process URL " + url, e);
         }
 
         return processValidationResponse(validationResponse);
@@ -103,7 +104,7 @@ public class ValidatorController{
         try {
             validationResponse = debugByContent(request ,inputAsString);
         }catch (Exception e){
-            return processException("Failed to process", e);
+            return handleFailure("Failed to process", e);
         }
 
         return processValidationResponse(validationResponse);
@@ -171,7 +172,7 @@ public class ValidatorController{
         try {
             validationResponse = debugByUrl(request, url);
         }catch (Exception e){
-            return processException("Failed to process specification for " + url, e);
+            return handleFailure("Failed to process specification for " + url, e);
         }
 
         return new ResponseContext()
@@ -193,7 +194,7 @@ public class ValidatorController{
         try {
             validationResponse = debugByContent(request ,inputAsString);
         }catch (Exception e){
-            return processException("Failed to process specification", e);
+            return handleFailure("Failed to process specification", e);
         }
 
         return new ResponseContext()
@@ -502,7 +503,7 @@ public class ValidatorController{
         return null;
     }
 
-    private static ResponseContext processException(final String message, final Throwable throwable) {
+    private static ResponseContext handleFailure(final String message, final Throwable throwable) {
         LOGGER.error(message, throwable);
         return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity(convertThrowableToJsonString(message, throwable));
     }
