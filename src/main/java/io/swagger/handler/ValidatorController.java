@@ -36,11 +36,12 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.Response;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.net.InetAddress;
 import java.net.URL;
 import java.security.KeyManagementException;
@@ -49,8 +50,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import javax.ws.rs.core.Response;
 
 public class ValidatorController{
 
@@ -82,17 +87,11 @@ public class ValidatorController{
         ValidationResponse validationResponse = null;
         try {
             validationResponse = debugByUrl(request, url);
-        } catch ( Exception e ) {
-            return handleFailure( "Failed to process URL", e );
+        }catch (Exception e){
+            return handleFailure("Failed to process URL " + url, e);
         }
 
         return processValidationResponse(validationResponse);
-    }
-
-    private ResponseContext handleFailure( String loggedMessage, Exception e )
-    {
-        LOGGER.error( loggedMessage, e );
-        return new ResponseContext().status( Response.Status.INTERNAL_SERVER_ERROR).entity( loggedMessage );
     }
 
     public ResponseContext validateByContent(RequestContext request, JsonNode inputSpec) {
@@ -106,8 +105,8 @@ public class ValidatorController{
         ValidationResponse validationResponse = null;
         try {
             validationResponse = debugByContent(request ,inputAsString);
-        } catch ( Exception e ) {
-            return handleFailure( "Failed to process URL", e );
+        }catch (Exception e){
+            return handleFailure("Failed to process", e);
         }
 
         return processValidationResponse(validationResponse);
@@ -174,8 +173,8 @@ public class ValidatorController{
         ValidationResponse validationResponse = null;
         try {
             validationResponse = debugByUrl(request, url);
-        } catch ( Exception e ) {
-            return handleFailure( "Failed to process specification", e );
+        }catch (Exception e){
+            return handleFailure("Failed to process specification for " + url, e);
         }
 
         return new ResponseContext()
@@ -196,8 +195,8 @@ public class ValidatorController{
         ValidationResponse validationResponse = null;
         try {
             validationResponse = debugByContent(request ,inputAsString);
-        } catch ( Exception e ) {
-            return handleFailure( "Failed to process specification", e );
+        }catch (Exception e){
+            return handleFailure("Failed to process specification", e);
         }
 
         return new ResponseContext()
@@ -363,7 +362,7 @@ public class ValidatorController{
             return schemaV2;
         } catch (Exception e) {
             LOGGER.warn("error fetching schema from GitHub, using local copy");
-            schemaV2 = resolveJsonSchema(getResourceFileAsString(SCHEMA2_FILE));
+            schemaV2 = resolveJsonSchema(getResourceFileAsString(SCHEMA2_FILE), true);
             LAST_FETCH = System.currentTimeMillis();
             return schemaV2;
         }
@@ -516,4 +515,32 @@ public class ValidatorController{
         return null;
     }
 
+    private static ResponseContext handleFailure(final String message, final Throwable throwable) {
+        LOGGER.error(message, throwable);
+        return new ResponseContext().status(Response.Status.INTERNAL_SERVER_ERROR).entity(convertThrowableToJsonString(message, throwable));
+    }
+
+    private static String convertThrowableToJsonString(final String message, final Throwable throwable) {
+        Map<String, String> map = new HashMap<>();
+        map.put("message", message);
+        map.put("stacktrace", getStackTrace(throwable));
+        return convertToJson(map);
+    }
+
+    private static String convertToJson(Object object) {
+        StringWriter stringWriter = new StringWriter();
+        try {
+            JsonMapper.writeValue(stringWriter, object);
+        } catch (IOException e) {
+            LOGGER.error("Could not convert object data to json.", e);
+        }
+        return stringWriter.toString();
+    }
+
+    private static String getStackTrace(final Throwable throwable) {
+        final StringWriter sw = new StringWriter();
+        final PrintWriter pw = new PrintWriter(sw, true);
+        throwable.printStackTrace(pw);
+        return sw.getBuffer().toString();
+    }
 }
