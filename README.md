@@ -2,21 +2,21 @@
 
 [![Build Status](https://img.shields.io/jenkins/build.svg?jobUrl=https://jenkins.swagger.io/job/oss-swagger-validator-badge-master)](https://jenkins.swagger.io/view/OSS%20-%20Java/job/oss-swagger-validator-badge-master)
 
-This project shows a "valid swagger" badge on your site, supporting Swagger/OpenAPI 2.0 and OpenAPI 3.0 specifications.  
+This project shows a "valid swagger" badge on your site, supporting Swagger/OpenAPI 2.0 and OpenAPI 3.x specifications.  
 
 There is an online version hosted on http://validator.swagger.io.  
 
 You can also pull a docker image of the validator directly from [DockerHub](https://hub.docker.com/r/swaggerapi/swagger-validator-v2/), e.g.:
 
 ```
-docker pull swaggerapi/swagger-validator-v2:v2.0.13
-docker run -it -p 8080:8080 --name swagger-validator-v2 swaggerapi/swagger-validator-v2:v2.0.13
+docker pull swaggerapi/swagger-validator-v2:v2.1.0
+docker run -it -p 8080:8080 --name swagger-validator-v2 swaggerapi/swagger-validator-v2:v2.1.0
 ```
 
 Since version `2.0.2` local and non http/https urls are rejected by default, along with redirects; this is controllable with docker env variables / java system properties:
 
 ```
-docker run -it -p 8080:8080 -e "REJECT_LOCAL=false" -e "REJECT_REDIRECT=false" --name swagger-validator-v2 swaggerapi/swagger-validator-v2:v2.0.13
+docker run -it -p 8080:8080 -e "REJECT_LOCAL=false" -e "REJECT_REDIRECT=false" --name swagger-validator-v2 swaggerapi/swagger-validator-v2:v2.1.0
 ```
 
 In non docker environments, system properties `rejectLocal` and `rejectRedirect` can be used.
@@ -27,7 +27,10 @@ Web UI is reachable at http://localhost:8080/index.html and OpenAPI spec at http
 
 
 
-You can validate any OpenAPI specification against the [Swagger/OpenAPI 2.0 Schema](https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v2.0/schema.json) and [OpenAPI 3.0 Schema](https://github.com/OAI/OpenAPI-Specification/blob/v3.0.1/versions/3.0.1.md) as follows:
+You can validate OpenAPI specifications version 2.0 (Swagger), 3.0 and 3.1. [Swagger Parser](https://github.com/swagger-api/swagger-parser/blob/master/README.md) is used for semantic validation.
+Depending on `jsonSchemaValidation` query parameter value also JSON Schema validation can be executed (default to `true`) 
+
+Additional parameters allow to customize parsing and validation mode.
 
 ```
 <img src="https://validator.swagger.io/validator?url={YOUR_URL}">
@@ -51,10 +54,12 @@ curl -X POST -d @swagger.json -H 'Content-Type:application/json' https://validat
 
 In this example, `swagger.json` is the swagger definition in JSON format, in the CWD.
 
-Note that all the above is also applicable to OpenAPI 3.0 specifications; for example, using [https://petstore3.swagger.io/api/v3/openapi.json](https://petstore3.swagger.io/api/v3/openapi.json) as a source, we get ...
+Note that all the above is also applicable to OpenAPI 3.x specifications; for example, using [https://petstore3.swagger.io/api/v3/openapi.json](https://petstore3.swagger.io/api/v3/openapi.json) as a source, we get ...
 
 ![](https://validator.swagger.io/validator?url=https://petstore3.swagger.io/api/v3/openapi.json)
 
+Since version 2.1.0 a `/parseByUrl` and `/parseByContent` are available, returning a serialized parsed specification, with parsing and result configurable by
+parameters, e.g. passing `resolve`, etc. See [Swagger Parser](https://github.com/swagger-api/swagger-parser/blob/master/README.md#options)
 
 ### Running locally
 

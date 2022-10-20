@@ -1,0 +1,76 @@
+openapi: 3.0.0
+components:
+  pathItems:
+    getUserByName:
+      get:
+        tags:
+          - user
+        summary: Get user by user name
+        description: ""
+        operationId: getUserByName
+        parameters:
+          - name: username
+            in: path
+            description: 'The name that needs to be fetched. Use user1 for testing. '
+            required: true
+            schema:
+              type: string
+        responses:
+          "200":
+            description: successful operation
+            wrongField: WRONG
+            content:
+              application/xml:
+                schema:
+                  $ref: '#/components/schemas/User'
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/User'
+          "400":
+            description: Invalid username supplied
+          "404":
+            description: User not found
+          "500":
+            description: unexpected error
+            content:
+              application/json:
+                schema:
+                  $ref: 'http://localhost:1337/petstore30ext2.yaml#/components/schemas/Error'
+          "501":
+            description: unexpected error
+            content:
+              application/json:
+                schema:
+                  $ref: './petstore30ext2.yaml#/components/schemas/Error'
+
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        username:
+          type: string
+          example: theUser
+        firstName:
+          type: string
+          example: John
+        lastName:
+          type: string
+          example: James
+        email:
+          type: string
+          example: john@email.com
+        password:
+          type: string
+          example: "12345"
+        phone:
+          type: string
+          example: "12345"
+        userStatus:
+          type: integer
+          description: User Status
+          format: int32
+          example: 1
