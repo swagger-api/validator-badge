@@ -2,116 +2,312 @@
 openapi: 3.0.0
 info:
   title: Swagger Validator Badge
-  description: Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.0 definition
-  version: 2.0.13
+  description: Parses and validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.x definition
+  version: 2.1.0-SNAPSHOT
 servers:
-- url: "/"
+  - url: "/"
 paths:
   "/":
     get:
       tags:
-      - Validator
-      summary: Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.0 definition returning a valid/invalid badge
+        - Validator
+      summary: Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.x definition returning a valid/invalid badge
       description: |
-        Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.0 definition provided via `url` parameter
+        Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.x definition provided via `url` parameter
         returning a valid/invalid badge
       operationId: validateByUrl
       parameters:
-      - name: url
-        in: query
-        description: A URL to the definition
-        required: true
-        schema:
-          type: string
+        - $ref: '#/components/parameters/url'
+        - $ref: '#/components/parameters/resolve'
+        - $ref: '#/components/parameters/resolveFully'
+        - $ref: '#/components/parameters/validateInternalRefs'
+        - $ref: '#/components/parameters/validateExternalRefs'
+        - $ref: '#/components/parameters/resolveRequestBody'
+        - $ref: '#/components/parameters/resolveCombinators'
+        - $ref: '#/components/parameters/allowEmptyStrings'
+        - $ref: '#/components/parameters/legacyYamlDeserialization'
+        - $ref: '#/components/parameters/inferSchemaType'
+        - $ref: '#/components/parameters/jsonSchemaValidation'
+        - $ref: '#/components/parameters/legacyJsonSchemaValidation'
       responses:
         '200':
-          description: result of validation as valid/invalid badge
-          content:
-            "image/png":
-              schema:
-                type: string
-                format: binary
+          $ref: '#/components/responses/validationBadge'
     post:
       tags:
-      - Validator
-      summary: Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.0 definition returning a valid/invalid badge
+        - Validator
+      summary: Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.x definition returning a valid/invalid badge
       description: |
-        Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.0 definition provided in request body
+        Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.x definition provided in request body
         returning a valid/invalid badge
       operationId: validateByContent
+      parameters:
+        - $ref: '#/components/parameters/resolve'
+        - $ref: '#/components/parameters/resolveFully'
+        - $ref: '#/components/parameters/validateInternalRefs'
+        - $ref: '#/components/parameters/validateExternalRefs'
+        - $ref: '#/components/parameters/resolveRequestBody'
+        - $ref: '#/components/parameters/resolveCombinators'
+        - $ref: '#/components/parameters/allowEmptyStrings'
+        - $ref: '#/components/parameters/legacyYamlDeserialization'
+        - $ref: '#/components/parameters/inferSchemaType'
+        - $ref: '#/components/parameters/jsonSchemaValidation'
+        - $ref: '#/components/parameters/legacyJsonSchemaValidation'
       requestBody:
-        description: the specification to validate
-        content:
-          "application/yaml":
-            schema:
-              type: object
-          "application/json":
-            schema:
-              type: object
-        required: true
+        $ref: '#/components/requestBodies/specification'
       responses:
         '200':
-          description: result of validation as valid/invalid badge
-          content:
-            "image/png":
-              schema:
-                type: string
-                format: binary
+          $ref: '#/components/responses/validationBadge'
   "/debug":
     get:
       tags:
-      - Validator
-      summary: Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.0 definition returning a validation response
+        - Validator
+      summary: Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.x definition returning a validation response
       description: |
-        Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.0 definition provided via `url` parameter
+        Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.x definition provided via `url` parameter
         returning a validation response containing any found validation errors
       operationId: reviewByUrl
       parameters:
-      - name: url
-        in: query
-        description: A URL to the definition
-        required: true
-        schema:
-          type: string
+        - $ref: '#/components/parameters/url'
+        - $ref: '#/components/parameters/resolve'
+        - $ref: '#/components/parameters/resolveFully'
+        - $ref: '#/components/parameters/validateInternalRefs'
+        - $ref: '#/components/parameters/validateExternalRefs'
+        - $ref: '#/components/parameters/resolveRequestBody'
+        - $ref: '#/components/parameters/resolveCombinators'
+        - $ref: '#/components/parameters/allowEmptyStrings'
+        - $ref: '#/components/parameters/legacyYamlDeserialization'
+        - $ref: '#/components/parameters/inferSchemaType'
+        - $ref: '#/components/parameters/jsonSchemaValidation'
+        - $ref: '#/components/parameters/legacyJsonSchemaValidation'
       responses:
         '200':
-          description: result of validation as a validation response
-          content:
-            "application/yaml":
-              schema:
-                $ref: '#/components/schemas/ValidationResponse'
-            "application/json":
-              schema:
-                $ref: '#/components/schemas/ValidationResponse'
+          $ref: '#/components/responses/validationResponse'
     post:
       tags:
-      - Validator
-      summary: Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.0 definition returning a validation response
+        - Validator
+      summary: Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.x definition returning a validation response
       description: |
-        Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.0 definition provided via request body
+        Validates a Swagger/OpenAPI 2.0 or an OpenAPI 3.x definition provided via request body
         returning a validation response containing any found validation errors
       operationId: reviewByContent
+      parameters:
+        - $ref: '#/components/parameters/resolve'
+        - $ref: '#/components/parameters/resolveFully'
+        - $ref: '#/components/parameters/validateInternalRefs'
+        - $ref: '#/components/parameters/validateExternalRefs'
+        - $ref: '#/components/parameters/resolveRequestBody'
+        - $ref: '#/components/parameters/resolveCombinators'
+        - $ref: '#/components/parameters/allowEmptyStrings'
+        - $ref: '#/components/parameters/legacyYamlDeserialization'
+        - $ref: '#/components/parameters/inferSchemaType'
+        - $ref: '#/components/parameters/jsonSchemaValidation'
+        - $ref: '#/components/parameters/legacyJsonSchemaValidation'
       requestBody:
-        description: the specification to validate
-        content:
-          "application/json":
-            schema:
-              type: object
-          "application/yaml":
-            schema:
-              type: object
-        required: true
+        $ref: '#/components/requestBodies/specification'
       responses:
         '200':
-          description: result of validation as a validation response
-          content:
-            "application/yaml":
-              schema:
-                $ref: '#/components/schemas/ValidationResponse'
-            "application/json":
-              schema:
-                $ref: '#/components/schemas/ValidationResponse'
+          $ref: '#/components/responses/validationResponse'
+  "/parse":
+    get:
+      tags:
+        - Validator
+      summary: Resolves / Dereferences a Swagger/OpenAPI 2.0 or an OpenAPI 3.x definition returning the resolved file
+      operationId: parseByUrl
+      parameters:
+        - $ref: '#/components/parameters/url'
+        - $ref: '#/components/parameters/resolve'
+        - $ref: '#/components/parameters/resolveFully'
+        - $ref: '#/components/parameters/flatten'
+        - $ref: '#/components/parameters/validateInternalRefs'
+        - $ref: '#/components/parameters/validateExternalRefs'
+        - $ref: '#/components/parameters/resolveRequestBody'
+        - $ref: '#/components/parameters/resolveCombinators'
+        - $ref: '#/components/parameters/allowEmptyStrings'
+        - $ref: '#/components/parameters/legacyYamlDeserialization'
+        - $ref: '#/components/parameters/inferSchemaType'
+        - $ref: '#/components/parameters/jsonSchemaValidation'
+        - $ref: '#/components/parameters/legacyJsonSchemaValidation'
+        - $ref: '#/components/parameters/returnFullParseResult'
+
+      responses:
+        '200':
+          $ref: '#/components/responses/parseResponse'
+    post:
+      tags:
+        - Validator
+      summary: Resolves / Dereferences Swagger/OpenAPI 2.0 or an OpenAPI 3.x definition returning the resolved file
+      operationId: parseByContent
+      parameters:
+        - $ref: '#/components/parameters/resolve'
+        - $ref: '#/components/parameters/resolveFully'
+        - $ref: '#/components/parameters/flatten'
+        - $ref: '#/components/parameters/validateInternalRefs'
+        - $ref: '#/components/parameters/validateExternalRefs'
+        - $ref: '#/components/parameters/resolveRequestBody'
+        - $ref: '#/components/parameters/resolveCombinators'
+        - $ref: '#/components/parameters/allowEmptyStrings'
+        - $ref: '#/components/parameters/legacyYamlDeserialization'
+        - $ref: '#/components/parameters/inferSchemaType'
+        - $ref: '#/components/parameters/jsonSchemaValidation'
+        - $ref: '#/components/parameters/legacyJsonSchemaValidation'
+        - $ref: '#/components/parameters/returnFullParseResult'
+      requestBody:
+        $ref: '#/components/requestBodies/specification'
+      responses:
+        '200':
+          $ref: '#/components/responses/parseResponse'
 components:
+  requestBodies:
+    specification:
+      description: the specification to validate
+      content:
+        "application/yaml":
+          schema:
+            type: object
+        "application/json":
+          schema:
+            type: object
+      required: true
+  responses:
+    validationResponse:
+      description: result of validation as a validation response
+      content:
+        "application/yaml":
+          schema:
+            $ref: '#/components/schemas/ValidationResponse'
+        "application/json":
+          schema:
+            $ref: '#/components/schemas/ValidationResponse'
+    validationBadge:
+      description: result of validation as valid/invalid badge
+      content:
+        "image/png":
+          schema:
+            type: string
+            format: binary
+    parseResponse:
+      description: the parsed / resolved specification
+      content:
+        "application/yaml":
+          schema:
+            type: string
+        "application/json":
+          schema:
+            type: string
+        "text/plain":
+          schema:
+            type: string
+        application/octet-stream:
+          schema:
+            type: string
+            format: binary
+  parameters:
+    url:
+      name: url
+      in: query
+      description: A URL to the definition
+      required: true
+      schema:
+        type: string
+    resolve:
+      name: resolve
+      in: query
+      description: |
+        resolves the definition
+        See https://github.com/swagger-api/swagger-parser/blob/master/README.md#options
+      required: false
+      schema:
+        type: boolean
+    resolveFully:
+      name: resolveFully
+      in: query
+      description: |
+        fully resolves the definition
+        See https://github.com/swagger-api/swagger-parser/blob/master/README.md#options'
+      required: false
+      schema:
+        type: boolean
+    flatten:
+      name: flatten
+      in: query
+      description: |
+        flatten the definition
+        See https://github.com/swagger-api/swagger-parser/blob/master/README.md#options
+      required: false
+      schema:
+        type: boolean
+    validateInternalRefs:
+      name: validateInternalRefs
+      in: query
+      description: validate internal references
+      required: false
+      schema:
+        type: boolean
+    validateExternalRefs:
+      name: validateExternalRefs
+      in: query
+      description: validate external references while resolving
+      required: false
+      schema:
+        type: boolean
+    resolveRequestBody:
+      name: resolveRequestBody
+      in: query
+      description: bundle requestBody inline during resolving also with resolveFully set to false
+      required: false
+      schema:
+        type: boolean
+    resolveCombinators:
+      name: resolveCombinators
+      in: query
+      description: |
+        customizes behaviour related to `allOf/anyOf/oneOf` with resolveFully set to true. 
+        See https://github.com/swagger-api/swagger-parser/blob/master/README.md#options'
+      required: false
+      schema:
+        type: boolean
+    allowEmptyStrings:
+      name: allowEmptyStrings
+      in: query
+      description: when set to true parses empty values as empty strings
+      required: false
+      schema:
+        type: boolean
+    legacyYamlDeserialization:
+      name: legacyYamlDeserialization
+      in: query
+      description: legacyYamlDeserialization
+      required: false
+      schema:
+        type: boolean
+    inferSchemaType:
+      name: inferSchemaType
+      in: query
+      description: infer schema type for item, default and schemas with additionalProperties
+      required: false
+      schema:
+        type: boolean
+    jsonSchemaValidation:
+      name: jsonSchemaValidation
+      in: query
+      description: performs JSON Schema validation
+      required: false
+      schema:
+        type: boolean
+    legacyJsonSchemaValidation:
+      name: legacyJsonSchemaValidation
+      in: query
+      description: performs JSON Schema validation using legacy engine (fge)
+      required: false
+      schema:
+        type: boolean
+    returnFullParseResult:
+      name: returnFullParseResult
+      in: query
+      description: if set to true returns the full parse result including validation messages
+      required: false
+      schema:
+        type: boolean
   schemas:
     Instance:
       type: object

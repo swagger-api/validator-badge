@@ -1,82 +1,67 @@
 package io.swagger.handler;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.github.fge.jsonschema.core.report.ListProcessingReport;
 import com.github.fge.jsonschema.core.report.LogLevel;
 import com.github.fge.jsonschema.core.report.ProcessingMessage;
-import com.github.fge.jsonschema.core.report.ProcessingReport;
-import com.github.fge.jsonschema.main.JsonSchema;
-import com.github.fge.jsonschema.main.JsonSchemaFactory;
+import io.swagger.Utils;
+import io.swagger.jsonschema.FgeValidator;
+import io.swagger.jsonschema.NetworkntValidator;
+import io.swagger.jsonschema.Validator;
 import io.swagger.models.SchemaValidationError;
+import io.swagger.models.Swagger;
 import io.swagger.models.ValidationResponse;
 import io.swagger.oas.inflector.models.RequestContext;
 import io.swagger.oas.inflector.models.ResponseContext;
 import io.swagger.parser.SwaggerParser;
+import io.swagger.parser.util.InlineModelResolver;
 import io.swagger.parser.util.SwaggerDeserializationResult;
-import io.swagger.util.Json;
-import io.swagger.util.Yaml;
+import io.swagger.v3.core.util.Json;
+import io.swagger.v3.core.util.Json31;
+import io.swagger.v3.core.util.Yaml;
+import io.swagger.v3.core.util.Yaml31;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.parser.OpenAPIV3Parser;
+import io.swagger.v3.parser.core.models.ParseOptions;
 import io.swagger.v3.parser.core.models.SwaggerParseResult;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.StatusLine;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.conn.ssl.NoopHostnameVerifier;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContextBuilder;
-import org.apache.http.ssl.TrustStrategy;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.net.InetAddress;
-import java.net.URL;
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import javax.ws.rs.core.Response;
+public class ValidatorController {
 
-public class ValidatorController{
-
-    static final String SCHEMA_FILE = "schema3-fix-format-uri-reference.json";
-
-    static final String SCHEMA2_FILE = "schema.json";
-    static final String SCHEMA2_URL = "http://swagger.io/v2/schema.json";
-
-    static final String INVALID_VERSION = "Deprecated Swagger version.  Please visit http://swagger.io for information on upgrading to Swagger/OpenAPI 2.0 or OpenAPI 3.0";
-
-    static Logger LOGGER = LoggerFactory.getLogger(ValidatorController.class);
-    static long LAST_FETCH = 0;
-    static ObjectMapper JsonMapper = Json.mapper();
-    static ObjectMapper YamlMapper = Yaml.mapper();
-    private JsonSchema schemaV2;
-    private JsonSchema schemaV3;
-
+    static final String INVALID_VERSION = "Deprecated Swagger version.  Please visit http://swagger.io for information on upgrading to Swagger/OpenAPI 2.0 or OpenAPI 3.x";
+    static Logger LOGGER = LoggerFactory.getLogger(io.swagger.handler.ValidatorController.class);
     static boolean rejectLocal = StringUtils.isBlank(System.getProperty("rejectLocal")) ? true : Boolean.parseBoolean(System.getProperty("rejectLocal"));
     static boolean rejectRedirect = StringUtils.isBlank(System.getProperty("rejectRedirect")) ? true : Boolean.parseBoolean(System.getProperty("rejectRedirect"));
 
-    public ResponseContext validateByUrl(RequestContext request , String url) {
+    private Validator fgeValidator = new FgeValidator();
+    private Validator ntValidator = new NetworkntValidator();
+
+
+    public ResponseContext validateByUrl(
+            RequestContext request,
+            String url,
+            Boolean resolve,
+            Boolean resolveFully,
+            Boolean validateInternalRefs,
+            Boolean validateExternalRefs,
+            Boolean resolveRequestBody,
+            Boolean resolveCombinators,
+            Boolean allowEmptyStrings,
+            Boolean legacyYamlDeserialization,
+            Boolean inferSchemaType,
+            Boolean jsonSchemaValidation,
+            Boolean legacyJsonSchemaValidation) {
 
         if(url == null) {
             return new ResponseContext()
@@ -86,7 +71,20 @@ public class ValidatorController{
 
         ValidationResponse validationResponse = null;
         try {
-            validationResponse = debugByUrl(request, url);
+            validationResponse = debugByUrl(
+                    request,
+                    url,
+                    resolve,
+                    resolveFully,
+                    validateInternalRefs,
+                    validateExternalRefs,
+                    resolveRequestBody,
+                    resolveCombinators,
+                    allowEmptyStrings,
+                    legacyYamlDeserialization,
+                    inferSchemaType,
+                    jsonSchemaValidation,
+                    legacyJsonSchemaValidation);
         }catch (Exception e){
             return handleFailure("Failed to process URL " + url, e);
         }
@@ -94,7 +92,20 @@ public class ValidatorController{
         return processValidationResponse(validationResponse);
     }
 
-    public ResponseContext validateByContent(RequestContext request, JsonNode inputSpec) {
+    public ResponseContext validateByContent(
+            RequestContext request,
+            Boolean resolve,
+            Boolean resolveFully,
+            Boolean validateInternalRefs,
+            Boolean validateExternalRefs,
+            Boolean resolveRequestBody,
+            Boolean resolveCombinators,
+            Boolean allowEmptyStrings,
+            Boolean legacyYamlDeserialization,
+            Boolean inferSchemaType,
+            Boolean jsonSchemaValidation,
+            Boolean legacyJsonSchemaValidation,
+            JsonNode inputSpec) {
         if(inputSpec == null) {
             return new ResponseContext()
                     .status(Response.Status.BAD_REQUEST)
@@ -104,7 +115,21 @@ public class ValidatorController{
 
         ValidationResponse validationResponse = null;
         try {
-            validationResponse = debugByContent(request ,inputAsString);
+            validationResponse = debugByContent(
+                    request,
+                    inputAsString,
+                    null,
+                    resolve,
+                    resolveFully,
+                    validateInternalRefs,
+                    validateExternalRefs,
+                    resolveRequestBody,
+                    resolveCombinators,
+                    allowEmptyStrings,
+                    legacyYamlDeserialization,
+                    inferSchemaType,
+                    jsonSchemaValidation,
+                    legacyJsonSchemaValidation);
         }catch (Exception e){
             return handleFailure("Failed to process", e);
         }
@@ -162,7 +187,20 @@ public class ValidatorController{
                     .entity(this.getClass().getClassLoader().getResourceAsStream("invalid.png"));
         }
     }
-    public ResponseContext reviewByUrl(RequestContext request , String url) {
+    public ResponseContext reviewByUrl(
+            RequestContext request,
+            String url,
+            Boolean resolve,
+            Boolean resolveFully,
+            Boolean validateInternalRefs,
+            Boolean validateExternalRefs,
+            Boolean resolveRequestBody,
+            Boolean resolveCombinators,
+            Boolean allowEmptyStrings,
+            Boolean legacyYamlDeserialization,
+            Boolean inferSchemaType,
+            Boolean jsonSchemaValidation,
+            Boolean legacyJsonSchemaValidation) {
 
         if(url == null) {
             return new ResponseContext()
@@ -172,7 +210,21 @@ public class ValidatorController{
 
         ValidationResponse validationResponse = null;
         try {
-            validationResponse = debugByUrl(request, url);
+            validationResponse = debugByUrl(
+                    request,
+                    url,
+                    resolve,
+                    resolveFully,
+                    validateInternalRefs,
+                    validateExternalRefs,
+                    resolveRequestBody,
+                    resolveCombinators,
+                    allowEmptyStrings,
+                    legacyYamlDeserialization,
+                    inferSchemaType,
+                    jsonSchemaValidation,
+                    legacyJsonSchemaValidation
+            );
         }catch (Exception e){
             return handleFailure("Failed to process specification for " + url, e);
         }
@@ -184,7 +236,20 @@ public class ValidatorController{
     }
 
 
-    public ResponseContext reviewByContent(RequestContext request, JsonNode inputSpec) {
+    public ResponseContext reviewByContent(
+            RequestContext request,
+            Boolean resolve,
+            Boolean resolveFully,
+            Boolean validateInternalRefs,
+            Boolean validateExternalRefs,
+            Boolean resolveRequestBody,
+            Boolean resolveCombinators,
+            Boolean allowEmptyStrings,
+            Boolean legacyYamlDeserialization,
+            Boolean inferSchemaType,
+            Boolean jsonSchemaValidation,
+            Boolean legacyJsonSchemaValidation,
+            JsonNode inputSpec) {
         if(inputSpec == null) {
             return new ResponseContext()
                     .status(Response.Status.BAD_REQUEST)
@@ -194,7 +259,22 @@ public class ValidatorController{
 
         ValidationResponse validationResponse = null;
         try {
-            validationResponse = debugByContent(request ,inputAsString);
+            validationResponse = debugByContent(
+                    request,
+                    inputAsString,
+                    null,
+                    resolve,
+                    resolveFully,
+                    validateInternalRefs,
+                    validateExternalRefs,
+                    resolveRequestBody,
+                    resolveCombinators,
+                    allowEmptyStrings,
+                    legacyYamlDeserialization,
+                    inferSchemaType,
+                    jsonSchemaValidation,
+                    legacyJsonSchemaValidation
+            );
         }catch (Exception e){
             return handleFailure("Failed to process specification", e);
         }
@@ -230,7 +310,20 @@ public class ValidatorController{
                 .entity(messages);
     }
 
-    public ValidationResponse debugByUrl( RequestContext request, String url) throws Exception {
+    public ValidationResponse debugByUrl(
+            RequestContext request,
+            String url,
+            Boolean resolve,
+            Boolean resolveFully,
+            Boolean validateInternalRefs,
+            Boolean validateExternalRefs,
+            Boolean resolveRequestBody,
+            Boolean resolveCombinators,
+            Boolean allowEmptyStrings,
+            Boolean legacyYamlDeserialization,
+            Boolean inferSchemaType,
+            Boolean jsonSchemaValidation,
+            Boolean legacyJsonSchemaValidation) throws Exception {
         ValidationResponse output = new ValidationResponse();
         String content;
 
@@ -244,7 +337,7 @@ public class ValidatorController{
 
         // read the spec contents, bail if it fails
         try {
-            content = getUrlContents(url, ValidatorController.rejectLocal, ValidatorController.rejectRedirect);
+            content = Utils.getUrlContents(url, io.swagger.handler.ValidatorController.rejectLocal, io.swagger.handler.ValidatorController.rejectRedirect);
         } catch (Exception e) {
             ProcessingMessage pm = new ProcessingMessage();
             pm.setLogLevel(LogLevel.ERROR);
@@ -253,16 +346,44 @@ public class ValidatorController{
             return output;
         }
 
-        return debugByContent(request, content);
+        return debugByContent(
+                request,
+                content,
+                url,
+                resolve,
+                resolveFully,
+                validateInternalRefs,
+                validateExternalRefs,
+                resolveRequestBody,
+                resolveCombinators,
+                allowEmptyStrings,
+                legacyYamlDeserialization,
+                inferSchemaType,
+                jsonSchemaValidation,
+                legacyJsonSchemaValidation);
     }
 
-    public ValidationResponse debugByContent(RequestContext request, String content) throws Exception {
+    public ValidationResponse debugByContent(
+            RequestContext request,
+            String content,
+            String location,
+            Boolean resolve,
+            Boolean resolveFully,
+            Boolean validateInternalRefs,
+            Boolean validateExternalRefs,
+            Boolean resolveRequestBody,
+            Boolean resolveCombinators,
+            Boolean allowEmptyStrings,
+            Boolean legacyYamlDeserialization,
+            Boolean inferSchemaType,
+            Boolean jsonSchemaValidation,
+            Boolean legacyJsonSchemaValidation) throws Exception {
 
         ValidationResponse output = new ValidationResponse();
 
         // convert to a JsonNode
 
-        JsonNode spec = readNode(content);
+        JsonNode spec = Utils.readNode(content);
         if (spec == null) {
             ProcessingMessage pm = new ProcessingMessage();
             pm.setLogLevel(LogLevel.ERROR);
@@ -271,248 +392,585 @@ public class ValidatorController{
             return output;
         }
 
-        boolean isVersion2 = false;
+        // get the version, return deprecated if version 1.x
+        Utils.VERSION version = Utils.getVersion(spec);
+        switch(version) {
+            case V20:
+                SwaggerDeserializationResult result = null;
+                try {
+                    result = readSwagger(content, resolve, false);
+                } catch (Exception e) {
+                    LOGGER.debug("can't read Swagger contents", e);
+
+                    ProcessingMessage pm = new ProcessingMessage();
+                    pm.setLogLevel(LogLevel.ERROR);
+                    pm.setMessage("unable to parse Swagger: " + e.getMessage());
+                    output.addValidationMessage(new SchemaValidationError(pm.asJson()));
+                    return output;
+                }
+                if (result != null) {
+                    for (String message : result.getMessages()) {
+                        output.addMessage(message);
+                    }
+                }
+                break;
+            case V30:
+            case V31:
+                SwaggerParseResult parseResult = null;
+                try {
+                    parseResult = readOpenApi(
+                            content,
+                            location,
+                            resolve,
+                            resolveFully,
+                            false,
+                            validateInternalRefs,
+                            validateExternalRefs,
+                            resolveRequestBody,
+                            resolveCombinators,
+                            allowEmptyStrings,
+                            legacyYamlDeserialization,
+                            inferSchemaType);
+                } catch (Exception e) {
+                    LOGGER.debug("can't read OpenAPI contents", e);
+
+                    ProcessingMessage pm = new ProcessingMessage();
+                    pm.setLogLevel(LogLevel.ERROR);
+                    pm.setMessage("unable to parse OpenAPI: " + e.getMessage());
+                    output.addValidationMessage(new SchemaValidationError(pm.asJson()));
+                    return output;
+                }
+                if (parseResult != null) {
+                    for (String message : parseResult.getMessages()) {
+                        output.addMessage(message);
+                    }
+                }
+                break;
+            case NONE:
+            case V1:
+            default:
+                ProcessingMessage pm = new ProcessingMessage();
+                pm.setLogLevel(LogLevel.ERROR);
+                pm.setMessage(INVALID_VERSION);
+                output.addValidationMessage(new SchemaValidationError(pm.asJson()));
+                return output;
+        }
+
+        // do actual JSON schema validation
+        if (Boolean.FALSE.equals(jsonSchemaValidation)) {
+            return output;
+        }
+
+        if (!Boolean.FALSE.equals(legacyJsonSchemaValidation) && fgeValidator.supports(version)) {
+            output.addValidationMessages(fgeValidator.validate(spec, version, location));
+        } else {
+            if (ntValidator.supports(version)) {
+                output.addValidationMessages(ntValidator.validate(spec, version, location));
+            }
+        }
+        return output;
+    }
+
+    public ResponseContext parseByUrl(
+            RequestContext request,
+            String url,
+            Boolean resolve,
+            Boolean resolveFully,
+            Boolean flatten,
+            Boolean validateInternalRefs,
+            Boolean validateExternalRefs,
+            Boolean resolveRequestBody,
+            Boolean resolveCombinators,
+            Boolean allowEmptyStrings,
+            Boolean legacyYamlDeserialization,
+            Boolean inferSchemaType,
+            Boolean jsonSchemaValidation,
+            Boolean legacyJsonSchemaValidation,
+            Boolean returnFullParseResult) throws Exception {
+
+        String content;
+        if(StringUtils.isBlank(url)) {
+            return new ResponseContext()
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity( "No specification supplied in either the url or request body.  Try again?" );
+        }
+
+        // read the spec contents, bail if it fails
+        try {
+            content = Utils.getUrlContents(url, io.swagger.handler.ValidatorController.rejectLocal, io.swagger.handler.ValidatorController.rejectRedirect);
+        } catch (Exception e) {
+            return new ResponseContext()
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity( "Can't read from " + url );
+        }
+
+        try {
+            return parseContent(
+                    request,
+                    content,
+                    url,
+                    resolve,
+                    resolveFully,
+                    flatten,
+                    validateInternalRefs,
+                    validateExternalRefs,
+                    resolveRequestBody,
+                    resolveCombinators,
+                    allowEmptyStrings,
+                    legacyYamlDeserialization,
+                    inferSchemaType,
+                    jsonSchemaValidation,
+                    legacyJsonSchemaValidation,
+                    returnFullParseResult);
+        }catch (Exception e){
+            return handleFailure("Failed to process specification for " + url, e);
+        }
+    }
+
+    public ResponseContext parseByContent(
+            RequestContext request,
+            Boolean resolve,
+            Boolean resolveFully,
+            Boolean flatten,
+            Boolean validateInternalRefs,
+            Boolean validateExternalRefs,
+            Boolean resolveRequestBody,
+            Boolean resolveCombinators,
+            Boolean allowEmptyStrings,
+            Boolean legacyYamlDeserialization,
+            Boolean inferSchemaType,
+            Boolean jsonSchemaValidation,
+            Boolean legacyJsonSchemaValidation,
+            Boolean returnFullParseResult,
+            JsonNode inputSpec) {
+        if(inputSpec == null) {
+            return new ResponseContext()
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity( "No specification supplied in either the url or request body.  Try again?" );
+        }
+        String inputAsString = Json.pretty(inputSpec);
+
+        try {
+            return parseContent(
+                    request,
+                    inputAsString,
+                    null,
+                    resolve,
+                    resolveFully,
+                    flatten,
+                    validateInternalRefs,
+                    validateExternalRefs,
+                    resolveRequestBody,
+                    resolveCombinators,
+                    allowEmptyStrings,
+                    legacyYamlDeserialization,
+                    inferSchemaType,
+                    jsonSchemaValidation,
+                    legacyJsonSchemaValidation,
+                    returnFullParseResult
+            );
+        }catch (Exception e){
+            return handleFailure("Failed to process specification", e);
+        }
+    }
+
+    public ResponseContext parseContent(
+            RequestContext request,
+            String content,
+            String location,
+            Boolean resolve,
+            Boolean resolveFully,
+            Boolean flatten,
+            Boolean validateInternalRefs,
+            Boolean validateExternalRefs,
+            Boolean resolveRequestBody,
+            Boolean resolveCombinators,
+            Boolean allowEmptyStrings,
+            Boolean legacyYamlDeserialization,
+            Boolean inferSchemaType,
+            Boolean jsonSchemaValidation,
+            Boolean legacyJsonSchemaValidation,
+            Boolean returnFullParseResult) throws Exception {
+
+        JsonNode spec = Utils.readNode(content);
+        if (spec == null) {
+            return new ResponseContext()
+                    .status(Response.Status.BAD_REQUEST)
+                    .entity( "Unable to read content.  It may be invalid JSON or YAML" );
+        }
 
         // get the version, return deprecated if version 1.x
-        String version = getVersion(spec);
-        if (version != null && (version.startsWith("\"1") || version.startsWith("1"))) {
-            ProcessingMessage pm = new ProcessingMessage();
-            pm.setLogLevel(LogLevel.ERROR);
-            pm.setMessage(INVALID_VERSION);
-            output.addValidationMessage(new SchemaValidationError(pm.asJson()));
-            return output;
-        } else if (version != null && (version.startsWith("\"2") || version.startsWith("2"))) {
-            isVersion2 = true;
-            SwaggerDeserializationResult result = null;
-            try {
-                result = readSwagger(content);
-            } catch (Exception e) {
-                LOGGER.debug("can't read Swagger contents", e);
+        Utils.VERSION version = Utils.getVersion(spec);
+        SwaggerDeserializationResult resultV2 = null;
+        SwaggerParseResult resultV3 = null;
+        switch(version) {
+            case V20:
+                try {
+                    resultV2 = readSwagger(content, resolve, flatten);
+                } catch (Exception e) {
+                    LOGGER.debug("can't read Swagger contents", e);
 
-                ProcessingMessage pm = new ProcessingMessage();
-                pm.setLogLevel(LogLevel.ERROR);
-                pm.setMessage("unable to parse Swagger: " + e.getMessage());
-                output.addValidationMessage(new SchemaValidationError(pm.asJson()));
-                return output;
-            }
-            if (result != null) {
-                for (String message : result.getMessages()) {
-                    output.addMessage(message);
+                    return new ResponseContext()
+                            .status(Response.Status.BAD_REQUEST)
+                            .entity( "unable to parse Swagger: " + e.getMessage() );
                 }
-            }
-        } else if (version == null || (version.startsWith("\"3") || version.startsWith("3"))) {
-            SwaggerParseResult result = null;
-            try {
-                result = readOpenApi(content);
-            } catch (Exception e) {
-                LOGGER.debug("can't read OpenAPI contents", e);
+                if (resultV2 != null) {
+                    for (String message : resultV2.getMessages()) {
+                        LOGGER.debug(message);
+                    }
 
-                ProcessingMessage pm = new ProcessingMessage();
-                pm.setLogLevel(LogLevel.ERROR);
-                pm.setMessage("unable to parse OpenAPI: " + e.getMessage());
-                output.addValidationMessage(new SchemaValidationError(pm.asJson()));
-                return output;
-            }
-            if (result != null) {
-                for (String message : result.getMessages()) {
-                    output.addMessage(message);
                 }
-            }
+                break;
+            case V30:
+            case V31:
+                try {
+                    resultV3 = readOpenApi(
+                            content,
+                            location,
+                            resolve,
+                            resolveFully,
+                            flatten,
+                            validateInternalRefs,
+                            validateExternalRefs,
+                            resolveRequestBody,
+                            resolveCombinators,
+                            allowEmptyStrings,
+                            legacyYamlDeserialization,
+                            inferSchemaType);
+                } catch (Exception e) {
+                    LOGGER.debug("can't read OpenAPI contents", e);
+                    return new ResponseContext()
+                            .status(Response.Status.BAD_REQUEST)
+                            .entity( "unable to parse OpenAPI: " + e.getMessage() );
+                }
+                if (resultV3 != null) {
+                    for (String message : resultV3.getMessages()) {
+                        LOGGER.debug(message);
+                    }
+                }
+                break;
+            case NONE:
+            case V1:
+            default:
+                return new ResponseContext()
+                        .status(Response.Status.BAD_REQUEST)
+                        .entity( INVALID_VERSION );
         }
+
         // do actual JSON schema validation
-        JsonSchema schema = getSchema(isVersion2);
-        ProcessingReport report = schema.validate(spec);
-        ListProcessingReport lp = new ListProcessingReport();
-        lp.mergeWith(report);
+        if (!Boolean.FALSE.equals(jsonSchemaValidation)) {
+            List<SchemaValidationError> errors = null;
+            if (!Boolean.FALSE.equals(legacyJsonSchemaValidation) && fgeValidator.supports(version)) {
+                errors = fgeValidator.validate(spec, version, location);
+            } else {
+                errors = ntValidator.validate(spec, version, location);
+            }
+            if (errors != null) {
+                for (SchemaValidationError e : errors) {
+                    if (Utils.VERSION.V20.equals(version)) {
+                        resultV2.message(e.getMessage());
+                    } else {
+                        resultV3.message(e.getMessage());
+                    }
+                }
+            }
 
-        java.util.Iterator<ProcessingMessage> it = lp.iterator();
-        while (it.hasNext()) {
-            ProcessingMessage pm = it.next();
-            output.addValidationMessage(new SchemaValidationError(pm.asJson()));
         }
 
+        String mediaType = "application/json";
+        if (request.getAcceptableMediaTypes() != null && request.getAcceptableMediaTypes().contains(new MediaType("application", "yaml"))) {
+            mediaType = "application/yaml";
+        } else if (request.getAcceptableMediaTypes() != null && request.getAcceptableMediaTypes().contains(new MediaType("application", "octet-stream"))){
+            mediaType = "application/octet-stream";
+        } else if (request.getAcceptableMediaTypes() != null && request.getAcceptableMediaTypes().contains(new MediaType("text", "plain"))){
+            mediaType = "text/plain";
+        }
+        String specFingerprint = content.trim().substring(0, 1);
+        boolean isJson = specFingerprint.startsWith("{") || specFingerprint.startsWith("[");
+        String name = "result";
+        if (!StringUtils.isBlank(location)) {
+            String ext = location.split("\\.")[location.split("\\.").length - 1];
+            name = location.split("/")[location.split("/").length - 1];
+            name = name.substring(0, name.length() - ext.length() - 1);
+        }
+        byte[] bytes = null;
+        JsonNode resultAsNode = null;
+        switch(version) {
+            case V20:
+                if (resultV2 == null) {
+                    return new ResponseContext()
+                            .status(Response.Status.NO_CONTENT)
+                            .entity( "No result" );
+                }
+                switch (mediaType) {
+                    case "application/yaml":
+                        if (Boolean.TRUE.equals(returnFullParseResult)) {
+                            resultAsNode = io.swagger.util.Json.mapper().convertValue(resultV2, JsonNode.class);
+                        } else {
+                            resultAsNode = io.swagger.util.Json.mapper().convertValue(resultV2.getSwagger(), JsonNode.class);
+                        }
+                        return new ResponseContext()
+                                .contentType("application/yaml")
+                                .entity(resultAsNode);
+                    case "application/octet-stream":
+                        if (Boolean.TRUE.equals(returnFullParseResult)) {
+                            if (isJson) {
+                                bytes = io.swagger.util.Json.pretty(resultV2).getBytes("UTF-8");
+                            } else {
+                                bytes = io.swagger.util.Yaml.pretty().writeValueAsString(resultV2).getBytes("UTF-8");
+                            }
+                        } else {
+                            if (isJson) {
+                                bytes = io.swagger.util.Json.pretty(resultV2.getSwagger()).getBytes("UTF-8");
+                            } else {
+                                bytes = io.swagger.util.Yaml.pretty().writeValueAsString(resultV2.getSwagger()).getBytes("UTF-8");
+                            }
+                        }
+                        return new ResponseContext().status(200)
+                                .entity(bytes)
+                                .contentType(MediaType.APPLICATION_OCTET_STREAM_TYPE)
+                                .header("Content-Disposition", String.format("attachment; filename=\"%s-parsed" + (isJson ? ".json" : ".yaml") + "\"", name))
+                                .header("Accept-Range", "bytes")
+                                .header("Content-Length", String.valueOf(bytes.length));
+                    case "text/plain":
+                        if (Boolean.TRUE.equals(returnFullParseResult)) {
+                            if (isJson) {
+                                return new ResponseContext()
+                                        .contentType("text/plain")
+                                        .entity(io.swagger.util.Json.pretty(resultV2));
+                            } else {
+                                return new ResponseContext()
+                                        .contentType("text/plain")
+                                        .entity(io.swagger.util.Yaml.pretty().writeValueAsString(resultV2));
+                            }
+                        } else {
+                            if (isJson) {
+                                return new ResponseContext()
+                                        .contentType("text/plain")
+                                        .entity(io.swagger.util.Json.pretty(resultV2.getSwagger()));
+                            } else {
+                                return new ResponseContext()
+                                        .contentType("text/plain")
+                                        .entity(io.swagger.util.Yaml.pretty().writeValueAsString(resultV2.getSwagger()));
+                            }
+                        }
+                    default:
+                        return new ResponseContext()
+                                .contentType("application/json")
+                                .entity(io.swagger.util.Json.mapper().convertValue(resultV2.getSwagger(), JsonNode.class));
+                }
+            case V30:
+                if (resultV3 == null) {
+                    return new ResponseContext()
+                            .status(Response.Status.NO_CONTENT)
+                            .entity( "No result" );
+                }
+                switch (mediaType) {
+                    case "application/yaml":
+                        if (Boolean.TRUE.equals(returnFullParseResult)) {
+                            resultAsNode = Json.mapper().convertValue(resultV3, JsonNode.class);
+                        } else {
+                            resultAsNode = Json.mapper().convertValue(resultV3.getOpenAPI(), JsonNode.class);
+                        }
+                        return new ResponseContext()
+                                .contentType("application/yaml")
+                                .entity(resultAsNode);
+                    case "application/octet-stream":
+                        if (Boolean.TRUE.equals(returnFullParseResult)) {
+                            if (isJson) {
+                                bytes = Json.pretty(resultV3).getBytes("UTF-8");
+                            } else {
+                                bytes = Yaml.pretty().writeValueAsString(resultV3).getBytes("UTF-8");
+                            }
+                        } else {
+                            if (isJson) {
+                                bytes = Json.pretty(resultV3.getOpenAPI()).getBytes("UTF-8");
+                            } else {
+                                bytes = Yaml.pretty().writeValueAsString(resultV3.getOpenAPI()).getBytes("UTF-8");
+                            }
+                        }
+                        return new ResponseContext().status(200)
+                                .entity(bytes)
+                                .contentType(MediaType.APPLICATION_OCTET_STREAM_TYPE)
+                                .header("Content-Disposition", String.format("attachment; filename=\"%s-parsed" + (isJson ? ".json" : ".yaml") + "\"", name))
+                                .header("Accept-Range", "bytes")
+                                .header("Content-Length", String.valueOf(bytes.length));
+                    case "text/plain":
+                        if (Boolean.TRUE.equals(returnFullParseResult)) {
+                            if (isJson) {
+                                return new ResponseContext()
+                                        .contentType("text/plain")
+                                        .entity(Json.pretty(resultV3));
+                            } else {
+                                return new ResponseContext()
+                                        .contentType("text/plain")
+                                        .entity(Yaml.pretty().writeValueAsString(resultV3));
+                            }
+                        } else {
+                            if (isJson) {
+                                return new ResponseContext()
+                                        .contentType("atext/plain")
+                                        .entity(Json.pretty(resultV3.getOpenAPI()));
+                            } else {
+                                return new ResponseContext()
+                                        .contentType("text/plain")
+                                        .entity(Yaml.pretty().writeValueAsString(resultV3.getOpenAPI()));
+                            }
+                        }
+                    default:
+                        return new ResponseContext()
+                                .contentType("application/json")
+                                .entity(Json.mapper().convertValue(resultV3.getOpenAPI(), JsonNode.class));
+                }
+            case V31:
+                if (resultV3 == null) {
+                    return new ResponseContext()
+                            .status(Response.Status.NO_CONTENT)
+                            .entity( "No result" );
+                }
+                switch (mediaType) {
+                    case "application/yaml":
+                        if (Boolean.TRUE.equals(returnFullParseResult)) {
+                            resultAsNode = Json31.mapper().convertValue(resultV3, JsonNode.class);
+                        } else {
+                            resultAsNode = Json31.mapper().convertValue(resultV3.getOpenAPI(), JsonNode.class);
+                        }
+                        return new ResponseContext()
+                                .contentType("application/yaml")
+                                .entity(resultAsNode);
+                    case "application/octet-stream":
+                        if (Boolean.TRUE.equals(returnFullParseResult)) {
+                            if (isJson) {
+                                bytes = Json31.pretty(resultV3).getBytes("UTF-8");
+                            } else {
+                                bytes = Yaml31.pretty().writeValueAsString(resultV3).getBytes("UTF-8");
+                            }
+                        } else {
+                            if (isJson) {
+                                bytes = Json31.pretty(resultV3.getOpenAPI()).getBytes("UTF-8");
+                            } else {
+                                bytes = Yaml31.pretty().writeValueAsString(resultV3.getOpenAPI()).getBytes("UTF-8");
+                            }
+                        }
+                        return new ResponseContext().status(200)
+                                .entity(bytes)
+                                .contentType(MediaType.APPLICATION_OCTET_STREAM_TYPE)
+                                .header("Content-Disposition", String.format("attachment; filename=\"%s-parsed" + (isJson ? ".json" : ".yaml") + "\"", name))
+                                .header("Accept-Range", "bytes")
+                                .header("Content-Length", String.valueOf(bytes.length));
+                    case "text/plain":
+                        if (Boolean.TRUE.equals(returnFullParseResult)) {
+                            if (isJson) {
+                                return new ResponseContext()
+                                        .contentType("text/plain")
+                                        .entity(Json31.pretty(resultV3));
+                            } else {
+                                return new ResponseContext()
+                                        .contentType("text/plain")
+                                        .entity(Yaml31.pretty().writeValueAsString(resultV3));
+                            }
+                        } else {
+                            if (isJson) {
+                                return new ResponseContext()
+                                        .contentType("text/plain")
+                                        .entity(Json31.pretty(resultV3.getOpenAPI()));
+                            } else {
+                                return new ResponseContext()
+                                        .contentType("text/plain")
+                                        .entity(Yaml31.pretty().writeValueAsString(resultV3.getOpenAPI()));
+                            }
+                        }
+                    default:
+                        return new ResponseContext()
+                                .contentType("application/json")
+                                .entity(Json31.mapper().convertValue(resultV3.getOpenAPI(), JsonNode.class));
+                }
+            default:
+                return new ResponseContext()
+                        .status(Response.Status.BAD_REQUEST)
+                        .entity( INVALID_VERSION );
+        }
+    }
+
+    private SwaggerParseResult readOpenApi(
+            String content,
+            String location,
+            Boolean resolve,
+            Boolean resolveFully,
+            Boolean flatten,
+            Boolean validateInternalRefs,
+            Boolean validateExternalRefs,
+            Boolean resolveRequestBody,
+            Boolean resolveCombinators,
+            Boolean allowEmptyStrings,
+            Boolean legacyYamlDeserialization,
+            Boolean inferSchemaType) throws IllegalArgumentException {
+        OpenAPIV3Parser parser = new OpenAPIV3Parser();
+        ParseOptions p = new ParseOptions();
+        p.setResolve(Boolean.TRUE.equals(resolve));
+        p.setResolveFully(Boolean.TRUE.equals(resolveFully));
+        p.setFlatten(Boolean.TRUE.equals(flatten));
+        if (Boolean.FALSE.equals(validateInternalRefs)) p.setValidateInternalRefs(validateInternalRefs);
+        p.setValidateExternalRefs(Boolean.TRUE.equals(validateExternalRefs));
+        p.setResolveRequestBody(Boolean.TRUE.equals(resolveRequestBody));
+        if (Boolean.FALSE.equals(resolveCombinators)) p.setResolveCombinators(resolveCombinators);
+        p.setAllowEmptyString(Boolean.TRUE.equals(allowEmptyStrings));
+        if (Boolean.FALSE.equals(allowEmptyStrings)) p.setAllowEmptyString(allowEmptyStrings);
+        p.setLegacyYamlDeserialization(Boolean.TRUE.equals(legacyYamlDeserialization));
+        p.setInferSchemaType(Boolean.TRUE.equals(inferSchemaType));
+        if (Boolean.FALSE.equals(inferSchemaType)) p.setInferSchemaType(inferSchemaType);
+        SwaggerParseResult result = parser.readContents(content, null, p, location);
+        clean(result.getOpenAPI());
+        return result;
+
+    }
+    private SwaggerDeserializationResult readSwagger(String content, Boolean resolve, Boolean flatten) throws IllegalArgumentException {
+        SwaggerParser parser = new SwaggerParser();
+        SwaggerDeserializationResult output = parser.readWithInfo(content, Boolean.FALSE.equals(resolve) ? false : true);
+        if (Boolean.TRUE.equals(flatten)) {
+            InlineModelResolver inlineModelResolver = new InlineModelResolver();
+            inlineModelResolver.flatten(output.getSwagger());
+        }
         return output;
     }
 
 
-    private JsonSchema getSchema(boolean isVersion2) throws Exception {
-        if (isVersion2) {
-            return getSchemaV2();
-        } else {
-            return getSchemaV3();
-        }
-    }
-
-    private JsonSchema getSchemaV3() throws Exception {
-        if (schemaV3 == null) {
-            schemaV3 = resolveJsonSchema(getResourceFileAsString(SCHEMA_FILE), true);
-        }
-        return schemaV3;
-    }
-
-    private JsonSchema getSchemaV2() throws Exception {
-        if (schemaV2 != null && (System.currentTimeMillis() - LAST_FETCH) < 600000) {
-            return schemaV2;
-        }
-
-        try {
-            LOGGER.debug("returning online schema");
-            LAST_FETCH = System.currentTimeMillis();
-            schemaV2 = resolveJsonSchema(getUrlContents(SCHEMA2_URL));
-            return schemaV2;
-        } catch (Exception e) {
-            LOGGER.warn("error fetching schema from GitHub, using local copy");
-            schemaV2 = resolveJsonSchema(getResourceFileAsString(SCHEMA2_FILE), true);
-            LAST_FETCH = System.currentTimeMillis();
-            return schemaV2;
-        }
-    }
-
-    private JsonSchema resolveJsonSchema(String schemaAsString) throws Exception {
-        return resolveJsonSchema(schemaAsString, false);
-    }
-    private JsonSchema resolveJsonSchema(String schemaAsString, boolean removeId) throws Exception {
-        JsonNode schemaObject = JsonMapper.readTree(schemaAsString);
-        if (removeId) {
-            ObjectNode oNode = (ObjectNode) schemaObject;
-            if (oNode.get("id") != null) {
-                oNode.remove("id");
+    private void clean(OpenAPI openAPI) {
+        if (openAPI.getComponents() != null) {
+            if(openAPI.getComponents().getCallbacks() != null && openAPI.getComponents().getCallbacks().isEmpty()) {
+                openAPI.getComponents().callbacks(null);
             }
-            if (oNode.get("$schema") != null) {
-                oNode.remove("$schema");
+            if(openAPI.getComponents().getRequestBodies() != null && openAPI.getComponents().getRequestBodies().isEmpty()) {
+                openAPI.getComponents().requestBodies(null);
             }
-            if (oNode.get("description") != null) {
-                oNode.remove("description");
+            if(openAPI.getComponents().getSchemas() != null && openAPI.getComponents().getSchemas().isEmpty()) {
+                openAPI.getComponents().schemas(null);
+            }
+            if(openAPI.getComponents().getHeaders() != null && openAPI.getComponents().getHeaders().isEmpty()) {
+                openAPI.getComponents().headers(null);
+            }
+            if(openAPI.getComponents().getLinks() != null && openAPI.getComponents().getLinks().isEmpty()) {
+                openAPI.getComponents().links(null);
+            }
+            if(openAPI.getComponents().getExamples() != null && openAPI.getComponents().getExamples().isEmpty()) {
+                openAPI.getComponents().examples(null);
+            }
+            if(openAPI.getComponents().getParameters() != null && openAPI.getComponents().getParameters().isEmpty()) {
+                openAPI.getComponents().parameters(null);
+            }
+            if(openAPI.getComponents().getPathItems() != null && openAPI.getComponents().getPathItems().isEmpty()) {
+                openAPI.getComponents().pathItems(null);
+            }
+            if(openAPI.getComponents().getResponses() != null && openAPI.getComponents().getResponses().isEmpty()) {
+                openAPI.getComponents().responses(null);
+            }
+            if(openAPI.getComponents().getSecuritySchemes() != null && openAPI.getComponents().getSecuritySchemes().isEmpty()) {
+                openAPI.getComponents().securitySchemes(null);
+            }
+            if(openAPI.getComponents().getExtensions() != null && openAPI.getComponents().getExtensions().isEmpty()) {
+                openAPI.getComponents().extensions(null);
             }
         }
-        JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
-        return factory.getJsonSchema(schemaObject);
-
-    }
-    private CloseableHttpClient getCarelessHttpClient(boolean disableRedirect) {
-        CloseableHttpClient httpClient = null;
-
-        try {
-            SSLContextBuilder builder = new SSLContextBuilder();
-            builder.loadTrustMaterial(null, new TrustStrategy() {
-                public boolean isTrusted(X509Certificate[] chain, String authType) throws CertificateException {
-                    return true;
-                }
-            });
-            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build(), NoopHostnameVerifier.INSTANCE);
-            HttpClientBuilder httpClientBuilder = HttpClients
-                    .custom()
-                    .setSSLSocketFactory(sslsf);
-            if (disableRedirect) {
-                httpClientBuilder.disableRedirectHandling();
-            }
-            httpClientBuilder.setUserAgent("swagger-validator");
-            httpClient = httpClientBuilder.build();
-        } catch (NoSuchAlgorithmException | KeyStoreException | KeyManagementException e) {
-            LOGGER.error("can't disable SSL verification", e);
-        }
-
-        return httpClient;
-    }
-
-    private String getUrlContents(String urlString) throws IOException {
-        return getUrlContents(urlString, false, false);
-    }
-    private String getUrlContents(String urlString, boolean rejectLocal, boolean rejectRedirect) throws IOException {
-        LOGGER.trace("fetching URL contents");
-        URL url = new URL(urlString);
-        if(rejectLocal) {
-            InetAddress inetAddress = InetAddress.getByName(url.getHost());
-            if(inetAddress.isAnyLocalAddress() || inetAddress.isLoopbackAddress() || inetAddress.isLinkLocalAddress()) {
-                throw new IOException("Only accepts http/https protocol");
-            }
-        }
-        final CloseableHttpClient httpClient = getCarelessHttpClient(rejectRedirect);
-
-        RequestConfig.Builder requestBuilder = RequestConfig.custom();
-        requestBuilder = requestBuilder
-                .setConnectTimeout(5000)
-                .setSocketTimeout(5000);
-
-        HttpGet getMethod = new HttpGet(urlString);
-        getMethod.setConfig(requestBuilder.build());
-        getMethod.setHeader("Accept", "application/json, */*");
-
-
-        if (httpClient != null) {
-            final CloseableHttpResponse response = httpClient.execute(getMethod);
-
-            try {
-
-                HttpEntity entity = response.getEntity();
-                StatusLine line = response.getStatusLine();
-                if(line.getStatusCode() > 299 || line.getStatusCode() < 200) {
-                    throw new IOException("failed to read swagger with code " + line.getStatusCode());
-                }
-                return EntityUtils.toString(entity, "UTF-8");
-            } finally {
-                response.close();
-                httpClient.close();
-            }
-        } else {
-            throw new IOException("CloseableHttpClient could not be initialized");
-        }
-    }
-
-    private SwaggerParseResult readOpenApi(String content) throws IllegalArgumentException {
-        OpenAPIV3Parser parser = new OpenAPIV3Parser();
-        return parser.readContents(content, null, null);
-
-    }
-
-    private SwaggerDeserializationResult readSwagger(String content) throws IllegalArgumentException {
-        SwaggerParser parser = new SwaggerParser();
-        return parser.readWithInfo(content);
-    }
-
-    private JsonNode readNode(String text) {
-        try {
-            if (text.trim().startsWith("{")) {
-                return JsonMapper.readTree(text);
-            } else {
-                return YamlMapper.readTree(text);
-            }
-        } catch (IOException e) {
-            return null;
-        }
-    }
-
-
-    private String getVersion(JsonNode node) {
-        if (node == null) {
-            return null;
-        }
-
-        JsonNode version = node.get("openapi");
-        if (version != null) {
-            return version.toString();
-        }
-
-        version = node.get("swagger");
-        if (version != null) {
-            return version.toString();
-        }
-        version = node.get("swaggerVersion");
-        if (version != null) {
-            return version.toString();
-        }
-
-        LOGGER.debug("version not found!");
-        return null;
-    }
-
-    public String getResourceFileAsString(String fileName) {
-        InputStream is = this.getClass().getClassLoader().getResourceAsStream(fileName);
-        if (is != null) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-            return reader.lines().collect(Collectors.joining(System.lineSeparator()));
-        }
-        return null;
     }
 
     private static ResponseContext handleFailure(final String message, final Throwable throwable) {
@@ -530,7 +988,7 @@ public class ValidatorController{
     private static String convertToJson(Object object) {
         StringWriter stringWriter = new StringWriter();
         try {
-            JsonMapper.writeValue(stringWriter, object);
+            io.swagger.v3.core.util.Json.mapper().writeValue(stringWriter, object);
         } catch (IOException e) {
             LOGGER.error("Could not convert object data to json.", e);
         }

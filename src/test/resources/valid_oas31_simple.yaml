@@ -1,0 +1,14 @@
+openapi: 3.1.0
+info:
+  version: "foo"
+  title: "foo"
+paths:
+  /users:
+    get:
+      responses:
+        '200':
+          description: hello world
+components:
+  schemas:
+    foo:
+      type: object

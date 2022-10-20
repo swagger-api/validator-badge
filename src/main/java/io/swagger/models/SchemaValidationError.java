@@ -15,6 +15,10 @@ public class SchemaValidationError {
     public SchemaValidationError() {
     }
 
+    public SchemaValidationError(String message, String level) {
+        this.message = message;
+        this.level = level;
+    }
     public SchemaValidationError(JsonNode node) {
         JsonNode prop = node.get("level");
         if (prop != null) {

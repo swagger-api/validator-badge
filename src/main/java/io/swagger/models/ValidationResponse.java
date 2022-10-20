@@ -1,6 +1,7 @@
 package io.swagger.models;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class ValidationResponse {
@@ -12,6 +13,13 @@ public class ValidationResponse {
             this.schemaValidationMessages = new ArrayList<SchemaValidationError>();
         }
         this.schemaValidationMessages.add(schemaValidationError);
+    }
+
+    public void addValidationMessages(Collection<SchemaValidationError> schemaValidationError) {
+        if(schemaValidationMessages == null) {
+            this.schemaValidationMessages = new ArrayList<>();
+        }
+        this.schemaValidationMessages.addAll(schemaValidationError);
     }
 
     public void addMessage(String message) {
