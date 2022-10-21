@@ -917,7 +917,6 @@ public class ValidatorController {
         p.setAllowEmptyString(Boolean.TRUE.equals(allowEmptyStrings));
         if (Boolean.FALSE.equals(allowEmptyStrings)) p.setAllowEmptyString(allowEmptyStrings);
         p.setLegacyYamlDeserialization(Boolean.TRUE.equals(legacyYamlDeserialization));
-        p.setInferSchemaType(Boolean.TRUE.equals(inferSchemaType));
         if (Boolean.FALSE.equals(inferSchemaType)) p.setInferSchemaType(inferSchemaType);
         SwaggerParseResult result = parser.readContents(content, null, p, location);
         clean(result.getOpenAPI());
