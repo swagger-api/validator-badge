@@ -50,9 +50,9 @@ Since the validator uses a browserless back-end to fetch the contents and schema
 
 ### Using cURL
 
-You can also post a spec up to the service with CURL:
+You can also post a spec up to the service with cURL:
 
-```
+```bash
 curl -X POST -d @swagger.json -H 'Content-Type:application/json' https://validator.swagger.io/validator/debug
 ```
 
@@ -60,7 +60,7 @@ In this example, `swagger.json` is the swagger definition in JSON format, in the
 
 If your swagger definition file is in YAML format, the command needs to be adapted like so:
 
-```
+```bash
 curl --data-binary @swagger.yaml -H 'Content-Type:application/yaml' https://validator.swagger.io/validator/debug",
 ```
 
@@ -79,7 +79,7 @@ parameters, e.g. passing `resolve`, etc. See [Swagger Parser](https://github.com
 
 You can build and run the validator locally:
 
-```
+```bash
 mvn package jetty:run
 ```
 
