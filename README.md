@@ -6,6 +6,8 @@ This project shows a "valid swagger" badge on your site, supporting Swagger/Open
 
 There is an online version hosted on http://validator.swagger.io.  
 
+### Using Docker
+
 You can also pull a docker image of the validator directly from [DockerHub](https://hub.docker.com/r/swaggerapi/swagger-validator-v2/), e.g.:
 
 ```
@@ -46,6 +48,8 @@ If your specification fails to validate for some reason, or if there is an error
 
 Since the validator uses a browserless back-end to fetch the contents and schema, it's not subject to the terrible world of CORS.
 
+### Using cURL
+
 You can also post a spec up to the service with CURL:
 
 ```
@@ -54,12 +58,22 @@ curl -X POST -d @swagger.json -H 'Content-Type:application/json' https://validat
 
 In this example, `swagger.json` is the swagger definition in JSON format, in the CWD.
 
-Note that all the above is also applicable to OpenAPI 3.x specifications; for example, using [https://petstore3.swagger.io/api/v3/openapi.json](https://petstore3.swagger.io/api/v3/openapi.json) as a source, we get ...
+If your swagger definition file is in YAML format, the command needs to be adapted like so:
+
+```
+curl --data-binary @swagger.yaml -H 'Content-Type:application/yaml' https://validator.swagger.io/validator/debug",
+```
+
+Note the use of `--data-binary` to avoid stripping newlines, along with a different `Content-Type` header.
+
+### Note
+
+All of the above is also applicable to OpenAPI 3.x specifications; for example, using [https://petstore3.swagger.io/api/v3/openapi.json](https://petstore3.swagger.io/api/v3/openapi.json) as a source, we get ...
 
 ![](https://validator.swagger.io/validator?url=https://petstore3.swagger.io/api/v3/openapi.json)
 
 Since version 2.1.0 a `/parseByUrl` and `/parseByContent` are available, returning a serialized parsed specification, with parsing and result configurable by
-parameters, e.g. passing `resolve`, etc. See [Swagger Parser](https://github.com/swagger-api/swagger-parser/blob/master/README.md#options)
+parameters, e.g. passing `resolve`, etc. See [Swagger Parser](https://github.com/swagger-api/swagger-parser/blob/master/README.md#options).
 
 ### Running locally
 
