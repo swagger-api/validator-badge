@@ -61,7 +61,7 @@ In this example, `swagger.json` is the swagger definition in JSON format, in the
 If your swagger definition file is in YAML format, the command needs to be adapted like so:
 
 ```bash
-curl --data-binary @swagger.yaml -H 'Content-Type:application/yaml' https://validator.swagger.io/validator/debug",
+curl --data-binary @swagger.yaml -H 'Content-Type:application/yaml' https://validator.swagger.io/validator/debug
 ```
 
 Note the use of `--data-binary` to avoid stripping newlines, along with a different `Content-Type` header.
