@@ -1,0 +1,30 @@
+name: Deployment
+on:
+    push:
+        branches:
+        - master
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        strategy:
+          matrix:
+            java: [ 8 ]
+        steps:
+        - uses: actions/checkout@v2
+        - name: Set up Java
+          uses: actions/setup-java@v1
+          with:
+            java-version: ${{ matrix.java }}
+            server-id: ossrh
+            server-username: MAVEN_USERNAME
+            server-password: MAVEN_PASSWORD
+        - name: Run maven deploy/release (action-maven-publish)
+          uses: samuelmeuli/action-maven-publish@v1
+          with:
+            gpg_private_key: ${{ secrets.OSSRH_GPG_PRIVATE_KEY }}
+            gpg_passphrase: ${{ secrets.OSSRH_GPG_PRIVATE_PASSPHRASE }}
+            nexus_username: ${{ secrets.OSSRH_USERNAME }}
+            nexus_password: ${{ secrets.OSSRH_TOKEN }}
+        env:
+          MAVEN_USERNAME: ${{ secrets.OSSRH_USERNAME }}
+          MAVEN_PASSWORD: ${{ secrets.OSSRH_TOKEN }}
