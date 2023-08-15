@@ -1,0 +1,83 @@
+name: Update from Dependabot
+on: pull_request
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    if: ${{ github.actor == 'dependabot[bot]' }}
+    strategy:
+      matrix:
+        java: [ 8 ]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+      - name: Set up Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+      - name: Set up Python 2.7
+        uses: MatteoH2O1999/setup-python@v1
+        with:
+          python-version: 2.7
+      - name: Fetch Dependabot metadata
+        id: dependabot-metadata
+        uses: dependabot/fetch-metadata@v1
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+      - name: Merge new branch into master
+        run: |
+          git checkout master
+          git merge ${{ steps.dependabot-metadata.outputs.target-branch }}
+          git push
+      - name: release
+        run: |
+          if [[ ${{ steps.dependabot-metadata.outputs.target-branch }} =~ ^.*SNAPSHOT$ ]];
+          then
+            echo "RELEASE_OK=no" >> $GITHUB_ENV
+          else
+            CURRENT_VERSION=$(CI/version.sh)
+            RELEASE_VERSION=${CURRENT_VERSION/-SNAPSHOT/}
+            mvn -q versions:set -DnewVersion="${RELEASE_VERSION}"
+            echo "CURRENT_VERSION=$CURRENT_VERSION" >> $GITHUB_ENV
+            echo "RELEASE_VERSION=$RELEASE_VERSION" >> $GITHUB_ENV
+            echo "RELEASE_OK=yes" >> $GITHUB_ENV
+          fi
+      - name: Create PR for new release
+        uses: peter-evans/create-pull-request@v4
+        if: env.RELEASE_OK == 'yes'
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: updating swagger-parser dependency to version ${{ inputs.version }}
+          title: 'release-to-${{ env.RELEASE_VERSION }}'
+          branch: release-to-${{ env.RELEASE_VERSION }}
+          delete-branch: true
+      - name: Merge release changes branch into master
+        if: env.RELEASE_OK == 'yes'
+        run: |
+          git checkout master
+          git merge release-to-${{ env.RELEASE_VERSION }}
+          git push
+      - name: bump up to next snapshot
+        if: env.RELEASE_OK == 'yes'
+        shell: bash
+        run: |
+          pwd
+          sh CI/bump-version.sh
+          BUMPED_VERSION=$(CI/version.sh)
+          echo "BUMPED_VERSION=$BUMPED_VERSION" >> $GITHUB_ENV
+      - name: Create PR for next snapshot
+        uses: peter-evans/create-pull-request@v4
+        if: env.RELEASE_OK == 'yes'
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "bump to next snapshot: ${{ env.BUMPED_VERSION }}"
+          title: 'next-version-to-${{ env.BUMPED_VERSION }}'
+          branch: next-version-to-${{ env.BUMPED_VERSION }}
+          delete-branch: true
+      - name: Merge next version bumping changes into master
+        if: env.RELEASE_OK == 'yes'
+        run: |
+          git checkout master
+          git merge next-version-to-${{ env.BUMPED_VERSION }}
+          git push
