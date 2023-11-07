@@ -447,7 +447,7 @@
         <junit-version>4.13.2</junit-version>
         <assertj-version>3.24.2</assertj-version>
         <json-schema-validator-version>2.2.14</json-schema-validator-version>
-        <nt-json-schema-validator-version>1.0.73</nt-json-schema-validator-version>
+        <nt-json-schema-validator-version>1.0.87</nt-json-schema-validator-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <sonatypeOssDistMgmtSnapshotsUrl>https://oss.sonatype.org/content/repositories/snapshots/</sonatypeOssDistMgmtSnapshotsUrl>
     </properties>
