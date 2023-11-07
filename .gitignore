@@ -1,7 +1,6 @@
 build/
 lib/*.jar
 target
-samples/scala-play2/logs
 .idea
 .idea_modules
 .settings
@@ -11,3 +10,9 @@ samples/scala-play2/logs
 atlassian-ide-plugin.xml
 *.iml
 .java-version
+*.ipr
+*.iws
+.DS_Store
+dependency-reduced-pom.xml
+*.pyc
+/bin/
