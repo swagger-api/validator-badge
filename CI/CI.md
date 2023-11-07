@@ -51,9 +51,10 @@ and clicking `Run Workflow`
 `Release` takes care of:
 
 * build and test maven
-* build and test gradle plugin
 * deploy/publish to maven central
 * publish the previously prepared GitHub release / tag
+* build and push docker image
+* deploy/publish docker image to docker hub
 * push PR for next snapshot
 
 
