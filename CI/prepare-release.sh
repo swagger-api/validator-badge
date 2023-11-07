@@ -13,6 +13,11 @@ SC_LAST_RELEASE=`python $CUR/CI/lastRelease.py`
 SC_RELEASE_TITLE="Swagger Validator $SC_VERSION released!"
 SC_RELEASE_TAG="v$SC_VERSION"
 
+echo "SC_VERSION: $SC_VERSION"
+echo "SC_NEXT_VERSION: $SC_NEXT_VERSION"
+echo "SC_LAST_RELEASE: $SC_LAST_RELEASE"
+echo "SC_RELEASE_TITLE: $SC_RELEASE_TITLE"
+echo "SC_RELEASE_TAG: $SC_RELEASE_TAG"
 
 #####################
 ### draft release Notes with next release after last release, with tag
