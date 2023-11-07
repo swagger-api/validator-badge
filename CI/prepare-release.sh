@@ -36,7 +36,7 @@ sed -i -e "s/$sc_find/$sc_replace/g" $CUR/README.md
 
 sc_find="version\: $SC_VERSION\-SNAPSHOT"
 sc_replace="version: $SC_VERSION"
-sed -i -e "s/$sc_find/$sc_replace/g" $CUR/src/main/swager.yaml
+sed -i -e "s/$sc_find/$sc_replace/g" $CUR/src/main/swagger/swagger.yaml
 
 
 

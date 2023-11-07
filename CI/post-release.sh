@@ -22,4 +22,4 @@ mvn versions:commit
 
 sc_find="version\: $SC_VERSION"
 sc_replace="version: $SC_NEXT_VERSION-SNAPSHOT"
-sed -i -e "s/$sc_find/$sc_replace/g" $CUR/src/main/swager.yaml
+sed -i -e "s/$sc_find/$sc_replace/g" $CUR/src/main/swagger/swagger.yaml
