@@ -78,7 +78,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.11.0</version>
+                <version>3.13.0</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -97,7 +97,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.2</version>
+                <version>3.2.3</version>
             </plugin>
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -125,7 +125,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>2.6</version>
+                <version>3.3.0</version>
                 <configuration>
                     <excludes>
                         <exclude>**/logback.xml</exclude>
@@ -183,7 +183,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>2.6</version>
+                <version>3.3.1</version>
                 <executions>
                     <execution>
                         <id>copy-resources</id>
@@ -432,22 +432,22 @@
     </repositories>
     <properties>
         <maven.compiler.release>8</maven.compiler.release>
-        <jackson.version>2.15.3</jackson.version>
-        <jackson-databind.version>2.15.3</jackson-databind.version>
+        <jackson.version>2.17.0</jackson.version>
+        <jackson-databind.version>2.17.0</jackson-databind.version>
         <snakeyaml.version>2.2</snakeyaml.version>
         <httpclient-version>4.5.14</httpclient-version>
         <maven-plugin-version>1.0.0</maven-plugin-version>
-        <swagger-parser-version>2.1.18</swagger-parser-version>
-        <swagger-inflector-version>2.0.10</swagger-inflector-version>
+        <swagger-parser-version>2.1.22</swagger-parser-version>
+        <swagger-inflector-version>2.0.12</swagger-inflector-version>
         <jetty-version>9.4.53.v20231009</jetty-version>
-        <logback-version>1.4.11</logback-version>
+        <logback-version>1.5.3</logback-version>
         <slf4j-version>2.0.9</slf4j-version>
         <surefire-version>3.1.2</surefire-version>
-        <wiremock-version>3.3.1</wiremock-version>
+        <wiremock-version>3.5.2</wiremock-version>
         <junit-version>4.13.2</junit-version>
-        <assertj-version>3.24.2</assertj-version>
+        <assertj-version>3.25.3</assertj-version>
         <json-schema-validator-version>2.2.14</json-schema-validator-version>
-        <nt-json-schema-validator-version>1.0.87</nt-json-schema-validator-version>
+        <nt-json-schema-validator-version>1.4.0</nt-json-schema-validator-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <sonatypeOssDistMgmtSnapshotsUrl>https://oss.sonatype.org/content/repositories/snapshots/</sonatypeOssDistMgmtSnapshotsUrl>
     </properties>
