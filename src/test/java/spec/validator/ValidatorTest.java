@@ -753,7 +753,7 @@ public class ValidatorTest {
 
         ValidationResponse validationResponse = (ValidationResponse) response.getEntity();
         assertThat(validationResponse.getMessages().contains(INFO_MISSING)).isTrue();
-        assertThat("$.info: is missing but it is required").isEqualTo(validationResponse.getSchemaValidationMessages().get(0).getMessage());
+        assertThat("$: required property 'info' not found").isEqualTo(validationResponse.getSchemaValidationMessages().get(0).getMessage());
     }
 
     @Test
@@ -843,7 +843,7 @@ public class ValidatorTest {
 
         ValidationResponse validationResponse = (ValidationResponse) response.getEntity();
         assertThat(validationResponse.getMessages().contains(INFO_MISSING)).isTrue();
-        assertThat("$.info: is missing but it is required").isEqualTo(validationResponse.getSchemaValidationMessages().get(0).getMessage());
+        assertThat("$: required property 'info' not found").isEqualTo(validationResponse.getSchemaValidationMessages().get(0).getMessage());
     }
 
     @Test
