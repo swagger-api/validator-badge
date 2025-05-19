@@ -1,29 +1,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>5</version>
-    </parent>
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.swagger.validator.v3</groupId>
     <artifactId>swagger-validator</artifactId>
     <packaging>war</packaging>
     <name>swagger-validator</name>
+    <description>swagger-validator</description>
     <version>2.1.7-SNAPSHOT</version>
     <url>https://github.com/swagger-api/validator-badge</url>
+    <developers>
+        <developer>
+            <id>frantuma</id>
+            <name>Francesco Tumanischvili</name>
+            <email>frantuma@yahoo.com</email>
+        </developer>
+    </developers>
     <prerequisites>
         <maven>2.2.0</maven>
     </prerequisites>
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-    </distributionManagement>
     <issueManagement>
         <system>github</system>
         <url>https://github.com/swagger-api/validator-badge/issues</url>
@@ -230,21 +223,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.13</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                    <stagingProgressTimeoutMinutes>30</stagingProgressTimeoutMinutes>
-                    <!--                    <skipStaging>true</skipStaging>
-                                        <skipRemoteStaging>true</skipRemoteStaging>
-                                        <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>-->
-                </configuration>
-            </plugin>
         </plugins>
         <pluginManagement>
             <plugins>
@@ -427,15 +405,6 @@
             <version>${slf4j-version}</version>
         </dependency>
     </dependencies>
-    <repositories>
-        <repository>
-            <id>sonatype-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
     <properties>
         <maven.compiler.release>8</maven.compiler.release>
         <jackson.version>2.18.2</jackson.version>
@@ -455,6 +424,5 @@
         <json-schema-validator-version>2.2.14</json-schema-validator-version>
         <nt-json-schema-validator-version>1.5.5</nt-json-schema-validator-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <sonatypeOssDistMgmtSnapshotsUrl>https://oss.sonatype.org/content/repositories/snapshots/</sonatypeOssDistMgmtSnapshotsUrl>
     </properties>
 </project>

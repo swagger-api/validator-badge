@@ -2,9 +2,11 @@ version: 2
 updates:
   - package-ecosystem: "maven"
     target-branch: "master"
+    open-pull-requests-limit: 5
     directory: "/"
     schedule:
       interval: "daily"
-    ignore:
-      - dependency-name: "*"
+      time: "19:00"
+    allow:
+      - dependency-name: "io.swagger*:*"
         update-types: ["version-update:semver-major"]

@@ -74,7 +74,7 @@ See also [here](https://github.com/peter-evans/create-pull-request/blob/master/d
 GPG private key and passphrase defined to be used for sonatype deployments, as detailed in
 https://central.sonatype.org/pages/working-with-pgp-signatures.html (I'd say with email matching the one  of the sonatype account of point 1
 
-* `OSSRH_USERNAME` and `OSSRH_TOKEN`: sonatype user/token
+* `MAVEN_USERNAME` and `MAVEN_PASSWORD`: sonatype user/token
 
 
 
