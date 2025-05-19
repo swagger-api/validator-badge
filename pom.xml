@@ -426,7 +426,7 @@
         <maven-plugin-version>1.0.0</maven-plugin-version>
         <swagger-parser-version>2.1.28</swagger-parser-version>
         <swagger-inflector-version>2.0.13</swagger-inflector-version>
-        <jetty-version>9.4.56.v20240826</jetty-version>
+        <jetty-version>9.4.57.v20241219</jetty-version>
         <logback-version>1.5.18</logback-version>
         <slf4j-version>2.0.16</slf4j-version>
         <surefire-version>3.1.2</surefire-version>
