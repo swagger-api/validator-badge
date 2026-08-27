@@ -340,7 +340,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson-databind.version}</version>
+            <version>${jackson.version}</version>
         </dependency>
 
         <dependency>
@@ -416,14 +416,13 @@
     </dependencies>
     <properties>
         <maven.compiler.release>8</maven.compiler.release>
-        <jackson.version>2.21.1</jackson.version>
-        <jackson-databind.version>2.20.0</jackson-databind.version>
-        <snakeyaml.version>2.5</snakeyaml.version>
+        <jackson.version>2.22.2</jackson.version>
+        <snakeyaml.version>2.6</snakeyaml.version>
         <httpclient-version>4.5.14</httpclient-version>
         <maven-plugin-version>1.0.0</maven-plugin-version>
-        <swagger-parser-version>2.1.37</swagger-parser-version>
-        <swagger-inflector-version>2.0.14</swagger-inflector-version>
-        <jetty-version>9.4.56.v20240826</jetty-version>
+        <swagger-parser-version>2.1.47</swagger-parser-version>
+        <swagger-inflector-version>2.0.17</swagger-inflector-version>
+        <jetty-version>9.4.58.v20250814</jetty-version>
         <logback-version>1.5.25</logback-version>
         <slf4j-version>2.0.17</slf4j-version>
         <surefire-version>3.5.4</surefire-version>
