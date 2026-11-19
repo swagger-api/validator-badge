@@ -1,11 +1,11 @@
 ## Continuous integration
 
-### Build, test and deploy
-Swagger Validator uses Github actions to run jobs/checks building, testing and deploying snapshots on push and PR events.
+### Build and test
+Swagger Validator uses Github actions to run jobs/checks building and testing on push and PR events. Nothing is published to Maven Central: the WAR is no longer published there, and the Docker image `swaggerapi/swagger-validator-v2` is the release artifact.
 
 These github actions are configured in `.github/workflows`:
 
-* maven.yml : Build Test Deploy master
+* maven.yml : Build Test master
 * maven-pulls.yml Build Test PR
 
 
@@ -51,10 +51,9 @@ and clicking `Run Workflow`
 `Release` takes care of:
 
 * build and test maven
-* deploy/publish to maven central
 * publish the previously prepared GitHub release / tag
-* build and push docker image
-* deploy/publish docker image to docker hub
+* build and push docker image to docker hub (the release artifact)
+* deploy the docker image to Kubernetes (EKS)
 * push PR for next snapshot
 
 
@@ -69,18 +68,3 @@ different from the default used in GitHub Actions (which does not allow to "chai
 The GitHub App must be configured as detailed in [this doc](https://github.com/peter-evans/create-pull-request/blob/master/docs/concepts-guidelines.md#authenticating-with-github-app-generated-tokens).
 
 See also [here](https://github.com/peter-evans/create-pull-request/blob/master/docs/concepts-guidelines.md#triggering-further-workflow-runs)
-
-* `OSSRH_GPG_PRIVATE_KEY` and `OSSRH_GPG_PRIVATE_PASSPHRASE` : gpg key and passphrase to be used for sonatype releases
-GPG private key and passphrase defined to be used for sonatype deployments, as detailed in
-https://central.sonatype.org/pages/working-with-pgp-signatures.html (I'd say with email matching the one  of the sonatype account of point 1
-
-* `MAVEN_USERNAME` and `MAVEN_PASSWORD`: sonatype user/token
-
-
-
-
-
-
-
-
-
