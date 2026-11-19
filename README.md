@@ -6,6 +6,8 @@ This project shows a "valid swagger" badge on your site, supporting Swagger/Open
 
 There is an online version hosted on http://validator.swagger.io.  
 
+> Starting with 2.1.10, the `io.swagger.validator.v3:swagger-validator` artifact is no longer published to Maven Central. Earlier versions remain available there. Use the `swaggerapi/swagger-validator-v2` docker image, or build the WAR from source with `mvn package` (output in `target/`).
+
 ### Using Docker
 
 You can also pull a docker image of the validator directly from [DockerHub](https://hub.docker.com/r/swaggerapi/swagger-validator-v2/), e.g.:
