@@ -8,6 +8,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    permissions:
+      id-token: write       # required for AWS OIDC (configure-aws-credentials)
+      contents: write       # required for publishing the GitHub release
+
     steps:
     - uses: actions/checkout@v4
 
