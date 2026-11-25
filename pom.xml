@@ -336,7 +336,7 @@
         <json-schema-validator-version>2.2.14</json-schema-validator-version>
         <nt-json-schema-validator-version>1.5.9</nt-json-schema-validator-version>
         <guava-version>33.8.0-android</guava-version>
-        <rhino-version>1.7.15.1</rhino-version>
+        <rhino-version>1.9.2</rhino-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 </project>
