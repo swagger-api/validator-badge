@@ -54,7 +54,7 @@
         <plugins>
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.13.0</version>
+                <version>3.16.0</version>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -87,7 +87,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.5.1</version>
                 <configuration>
                     <excludes>
                         <exclude>**/logback.xml</exclude>
@@ -125,7 +125,7 @@
             <plugin>
                 <groupId>com.googlecode.maven-download-plugin</groupId>
                 <artifactId>download-maven-plugin</artifactId>
-                <version>1.7.1</version>
+                <version>1.13.0</version>
                 <executions>
                     <execution>
                         <id>swagger-ui</id>
@@ -144,7 +144,7 @@
             </plugin>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
-                <version>3.3.1</version>
+                <version>3.5.0</version>
                 <executions>
                     <execution>
                         <id>copy-resources</id>
@@ -169,6 +169,21 @@
             </plugin>
         </plugins>
     </build>
+    <dependencyManagement>
+        <dependencies>
+            <!-- override outdated transitive versions from com.github.java-json-tools:json-schema-validator -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mozilla</groupId>
+                <artifactId>rhino</artifactId>
+                <version>${rhino-version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>io.swagger.parser.v3</groupId>
@@ -305,21 +320,23 @@
     </dependencies>
     <properties>
         <maven.compiler.release>8</maven.compiler.release>
-        <jackson.version>2.22.2</jackson.version>
-        <snakeyaml.version>2.6</snakeyaml.version>
+        <jackson.version>2.21.8</jackson.version>
+        <snakeyaml.version>2.7</snakeyaml.version>
         <httpclient-version>4.5.14</httpclient-version>
         <maven-plugin-version>1.0.0</maven-plugin-version>
-        <swagger-parser-version>2.1.47</swagger-parser-version>
-        <swagger-inflector-version>2.0.17</swagger-inflector-version>
+        <swagger-parser-version>2.1.49</swagger-parser-version>
+        <swagger-inflector-version>2.0.18</swagger-inflector-version>
         <jetty-version>9.4.58.v20250814</jetty-version>
-        <logback-version>1.5.25</logback-version>
-        <slf4j-version>2.0.17</slf4j-version>
-        <surefire-version>3.5.4</surefire-version>
+        <logback-version>1.6.8</logback-version>
+        <slf4j-version>2.0.20</slf4j-version>
+        <surefire-version>3.6.1</surefire-version>
         <wiremock-version>3.13.2</wiremock-version>
         <junit-version>4.13.2</junit-version>
         <assertj-version>3.27.7</assertj-version>
         <json-schema-validator-version>2.2.14</json-schema-validator-version>
         <nt-json-schema-validator-version>1.5.9</nt-json-schema-validator-version>
+        <guava-version>33.8.0-android</guava-version>
+        <rhino-version>1.7.15.1</rhino-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 </project>
